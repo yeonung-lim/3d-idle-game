@@ -1,5 +1,7 @@
 using AsyncInitialize;
+using Back.Module.Login;
 using BackEnd;
+using UnityCommunity.UnitySingleton;
 using UnityEngine;
 
 namespace Back
@@ -7,20 +9,33 @@ namespace Back
     /// <summary>
     ///     뒤끝 관리자
     /// </summary>
-    public class BackEndManager : MonoAsyncInit
+    public class BackEndManager : Singleton<BackEndManager>, IAsyncInit
     {
-        public override void Reset()
+        public override bool IsInitialized => base.IsInitialized && Backend.IsInitialized; // 뒤끝이 초기화되었는지 확인
+
+        public void StartInitialize()
         {
-            IsInitialized = false;
+            Initialize();
+
+            if (!IsInitialized) return;
+
+            Login();
         }
 
-        public override CustomizableAsyncOperation GetAsyncOperation()
+        public void Reset()
+        {
+        }
+
+        public CustomizableAsyncOperation GetAsyncOperation()
         {
             return CustomizableAsyncOperation.Create(() => IsInitialized);
         }
 
-        public override void StartProcess()
+        public void Initialize()
         {
+            if (IsInitialized)
+                return;
+
             var bro = Backend.Initialize(true); // 뒤끝 초기화
 
             // 뒤끝 초기화에 대한 응답값
@@ -28,8 +43,16 @@ namespace Back
                 Debug.Log("초기화 성공 : " + bro); // 성공일 경우 statusCode 204 Success
             else
                 Debug.LogError("초기화 실패 : " + bro); // 실패일 경우 statusCode 400대 에러 발생
+        }
 
-            IsInitialized = true;
+        private void SignUp()
+        {
+            BackEndLogin.CustomSignUp("id", "pw");
+        }
+
+        private void Login()
+        {
+            BackEndLogin.GetAccessToken();
         }
     }
 }

@@ -1,7 +1,10 @@
+using System.Collections.Generic;
 using AsyncInitialize;
+using Back;
 using Cysharp.Threading.Tasks;
-using UI.Loading;
+using GPGS;
 using UnityEngine;
+using View.ViewComponents.Loading;
 using State = Core.StateMachine.State;
 
 namespace Sequence
@@ -11,17 +14,19 @@ namespace Sequence
     /// </summary>
     public class SequenceManager : MonoBehaviour
     {
-        /// <summary>
-        ///     초기화 시 로딩 할 리소스들
-        ///     순차적으로 로딩됌
-        /// </summary>
-        [SerializeField] private MonoAsyncInit[] _asyncLoadingResources;
+        [SerializeField] private GameObject[] preloadedAssets; // 미리 로드할 프리팹
 
         [Header("Events")] [SerializeField] private AbstractGameEvent continueEvent; // 계속하기 이벤트
         [SerializeField] private AbstractGameEvent backEvent; // 뒤로가기 이벤트
         [SerializeField] private AbstractGameEvent winEvent; // 승리 클리어 이벤트
         [SerializeField] private AbstractGameEvent loseEvent; // 승리 실패 이벤트
         [SerializeField] private AbstractGameEvent pauseEvent; // 일시정지 이벤트
+
+        /// <summary>
+        ///     초기화 시 로딩 할 리소스들
+        ///     순차적으로 로딩됌
+        /// </summary>
+        private List<IAsyncInit> _asyncLoadingResources;
 
         /// <summary>
         ///     메인 메뉴 상태
@@ -32,6 +37,24 @@ namespace Sequence
         ///     상태 관리자
         /// </summary>
         private StateMachine _stateMachine;
+
+        /// <summary>
+        ///     초기화 상태
+        ///     - 미리 로드할 프리팹을 인스턴스화합니다.
+        /// </summary>
+        /// <returns></returns>
+        private IState CreateInitState()
+        {
+            return new State(InstantiatePreloadedAssets);
+        }
+
+        /// <summary>
+        ///     미리 로드한 에셋을 인스턴스화합니다.
+        /// </summary>
+        private void InstantiatePreloadedAssets()
+        {
+            foreach (var asset in preloadedAssets) Instantiate(asset);
+        }
 
         /// <summary>
         ///     초기화
@@ -61,6 +84,12 @@ namespace Sequence
                 // ShowUI<LoadingView, LoadingViewSetting>(
                 //     new LoadingViewSetting("loading_title", "loading_text", indicator));
 
+                _asyncLoadingResources = new List<IAsyncInit>
+                {
+                    GooglePlayGamesService.Instance,
+                    BackEndManager.Instance
+                };
+
                 LoadingResources(_asyncLoadingResources, indicator).ContinueWith(() => { continueEvent.Raise(); })
                     .Forget();
             });
@@ -69,24 +98,23 @@ namespace Sequence
         /// <summary>
         ///     IAsyncInit를 상속받은 클래스들을 로드합니다.
         /// </summary>
-        /// <param name="asyncLoadingResources">로딩 할 리소스</param>
+        /// <param name="asyncInits">로딩 할 리소스</param>
         /// <param name="indicator">로딩 인디케이터</param>
-        private async UniTask LoadingResources(MonoAsyncInit[] asyncLoadingResources, LoadingIndicator indicator)
+        private async UniTask LoadingResources(List<IAsyncInit> asyncInits, LoadingIndicator indicator)
         {
             var token = this.GetCancellationTokenOnDestroy();
 
             await UniTask.Yield(token);
 
-            for (var i = 0; i < asyncLoadingResources.Length; ++i)
+            for (var i = 0; i < asyncInits.Count; ++i)
             {
-                var resource = Instantiate(asyncLoadingResources[i]);
-                var operation = resource.GetAsyncOperation();
-                resource.StartProcess();
+                var operation = asyncInits[i].GetAsyncOperation();
+                asyncInits[i].StartInitialize();
 
                 await UniTask.WaitUntil(() =>
                 {
                     indicator.LoadingPercentage = CalculateLoadingProgress(operation,
-                        i, asyncLoadingResources.Length + 1);
+                        i, asyncInits.Count);
                     return operation.IsDone;
                 }, cancellationToken: token);
             }
@@ -117,14 +145,6 @@ namespace Sequence
         private IState CreateMainMenuState()
         {
             return new State(OnMainMenu);
-        }
-
-        /// <summary>
-        ///     메인 메뉴를 갱신합니다.
-        /// </summary>
-        public void RefreshMainMenu()
-        {
-            OnMainMenu();
         }
 
         private void OnMainMenu()

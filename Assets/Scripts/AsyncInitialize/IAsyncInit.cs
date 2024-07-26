@@ -6,20 +6,15 @@ namespace AsyncInitialize
     /// </summary>
     public interface IAsyncInit
     {
+        public bool IsInitialized { get; }
+
         /// <summary>
         ///     비동기 작업의 진행 상황을 반환합니다.
         /// </summary>
         /// <returns></returns>
         CustomizableAsyncOperation GetAsyncOperation();
 
-        /// <summary>
-        ///     비동기 작업을 시작합니다.
-        /// </summary>
-        void StartProcess();
-
-        /// <summary>
-        ///     비동기 작업을 초기화합니다.
-        /// </summary>
-        void Reset();
+        public void StartInitialize();
+        public void Reset();
     }
 }
