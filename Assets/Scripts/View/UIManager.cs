@@ -14,7 +14,11 @@ namespace View
             _views = GetComponentsInChildren<BaseView>(true);
         }
 
-        public static void ShowView<T>() where T : MonoBehaviour
+        public static void ShowView<T>() where T : BaseView
+        {
+        }
+        
+        public static void ShowPopup<T>() where T : BasePopup
         {
         }
     }

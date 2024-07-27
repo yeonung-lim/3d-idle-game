@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using AsyncInitialize;
 using Back;
 using Cysharp.Threading.Tasks;
-using GPGS;
 using UnityEngine;
 using View.ViewComponents.Loading;
 using State = Core.StateMachine.State;
@@ -61,13 +60,15 @@ namespace Sequence
         /// </summary>
         public void Initialize()
         {
+            var initState = CreateInitState(); // 초기화 상태를 생성합니다.
             var loadingState = CreateLoadingState(); // Loading UI를 띄우고, 리소스를 로딩합니다.
             _mainMenuState = CreateMainMenuState();
 
+            initState.AddLink(new Link(loadingState));
             loadingState.AddLink(new EventLink(continueEvent, _mainMenuState));
 
             _stateMachine = new StateMachine();
-            _stateMachine.Run(loadingState);
+            _stateMachine.Run(initState);
         }
 
         /// <summary>
@@ -86,7 +87,6 @@ namespace Sequence
 
                 _asyncLoadingResources = new List<IAsyncInit>
                 {
-                    GooglePlayGamesService.Instance,
                     BackEndManager.Instance
                 };
 

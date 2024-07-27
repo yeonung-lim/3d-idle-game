@@ -1,56 +1,65 @@
-using AsyncInitialize;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using GooglePlayGames;
 using GooglePlayGames.BasicApi;
-using UnityCommunity.UnitySingleton;
 using UnityEngine;
+using Utils.Async;
 
 namespace GPGS
 {
-    public class GooglePlayGamesService : PersistentMonoSingleton<GooglePlayGamesService>, IAsyncInit
+    public static class GooglePlayGamesService
     {
-        private static uint _initializeCount;
-        public static string AccessCode { get; private set; }
+        private static bool _autoAuthFailed;
+        private static string AccessToken { get; set; } = string.Empty;
+        public static bool IsAuthenticated => PlayGamesPlatform.Instance.IsAuthenticated();
 
-        public CustomizableAsyncOperation GetAsyncOperation()
+        public static UniTask<bool> Authenticate(CancellationToken token = default)
         {
-            return CustomizableAsyncOperation.Create(() => _initializeCount > 0);
+            if (PlayGamesPlatform.Instance.IsAuthenticated())
+                return CompletedTasks.True;
+
+            var tcs = Completion.CreateWithDefaultCancelToken<bool>();
+
+            if (_autoAuthFailed)
+                PlayGamesPlatform.Instance.ManuallyAuthenticate(ProcessSignIn);
+            else
+                PlayGamesPlatform.Instance.Authenticate(ProcessSignIn);
+
+            return tcs.Task;
+
+            // 구글 플레이 게임 서비스 로그인 처리 (중첩 함수)
+            void ProcessSignIn(SignInStatus status)
+            {
+                if (status != SignInStatus.Success)
+                {
+                    _autoAuthFailed = true;
+                    Debug.Log("구글 플레이 게임 서비스 로그인 실패 : " + status);
+
+                    tcs.TrySetResult(false);
+                    return;
+                }
+
+                Debug.Log("구글 플레이 게임 서비스 로그인 성공");
+                tcs.TrySetResult(true);
+            }
         }
 
-        public void StartInitialize()
+        public static async UniTask<string> RequestAccessCode()
         {
-        }
+            if (IsAuthenticated == false)
+                return string.Empty;
 
-        public void Reset()
-        {
-        }
+            if (string.IsNullOrEmpty(AccessToken) == false)
+                return AccessToken;
 
-        protected override void OnInitialized()
-        {
-            base.OnInitialized();
-
-            PlayGamesPlatform.Instance.Authenticate(ProcessAuthentication);
-        }
-
-        private void ProcessAuthentication(SignInStatus status)
-        {
-            _initializeCount++;
-
-            if (status != SignInStatus.Success)
-                // Disable your integration with Play Games Services or show a login button
-                // to ask users to sign-in. Clicking it shuld call
-                // PlayGamesPlatform.Instance.ManuallyAuthenticate(Process);
-                return;
-
-            RequestAccessCode();
-        }
-
-        private void RequestAccessCode()
-        {
+            var tcs = Completion.CreateWithDefaultCancelToken<string>();
             PlayGamesPlatform.Instance.RequestServerSideAccess(false, code =>
             {
-                Debug.Log("구글 인증 코드 : " + code);
-                AccessCode = code;
+                AccessToken = code;
+                tcs.TrySetResult(code);
             });
+
+            return await tcs.Task;
         }
     }
 }

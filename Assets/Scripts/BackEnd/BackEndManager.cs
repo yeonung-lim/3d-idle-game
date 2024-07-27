@@ -1,6 +1,7 @@
 using AsyncInitialize;
 using Back.Module.Login;
 using BackEnd;
+using Cysharp.Threading.Tasks;
 using UnityCommunity.UnitySingleton;
 using UnityEngine;
 
@@ -11,15 +12,18 @@ namespace Back
     /// </summary>
     public class BackEndManager : Singleton<BackEndManager>, IAsyncInit
     {
-        public override bool IsInitialized => base.IsInitialized && Backend.IsInitialized; // 뒤끝이 초기화되었는지 확인
+        public override bool IsInitialized => base.IsInitialized && BackEndLogin.IsAuthenticated; // 뒤끝이 초기화되었는지 확인
 
         public void StartInitialize()
         {
             Initialize();
 
-            if (!IsInitialized) return;
+            if (!Backend.IsInitialized)
+                // TODO: Show Error Popup (ex. "Failed to initialize BackEnd, please try again later.")
+                //View.UIManager.ShowView<>();
+                return;
 
-            Login();
+            Login().Forget();
         }
 
         public void Reset()
@@ -45,14 +49,11 @@ namespace Back
                 Debug.LogError("초기화 실패 : " + bro); // 실패일 경우 statusCode 400대 에러 발생
         }
 
-        private void SignUp()
+        private async UniTask<bool> Login()
         {
-            BackEndLogin.CustomSignUp("id", "pw");
-        }
-
-        private void Login()
-        {
-            BackEndLogin.GetAccessToken();
+            var result = await BackEndLogin.AuthorizeFederation();
+            Debug.Log("Login Result : " + result);
+            return result;
         }
     }
 }
