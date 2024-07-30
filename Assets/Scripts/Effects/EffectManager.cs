@@ -1,17 +1,14 @@
 ﻿using System.Collections.Generic;
-using AssetKits.ParticleImage;
 using Effects.Pooling;
-using RotaryHeart.Lib.SerializableDictionary;
+using UnityCommunity.UnitySingleton;
 using UnityEngine;
-using USingleton.AutoSingleton;
 
 namespace Effects
 {
     /// <summary>
     ///     이펙트 매니저
     /// </summary>
-    [Singleton(nameof(EffectManager))]
-    public class EffectManager : MonoBehaviour
+    public class EffectManager : PersistentMonoSingleton<EffectManager>
     {
         /// <summary>
         ///     기본 컨테이너
@@ -24,15 +21,15 @@ namespace Effects
         [SerializeField] private Transform mDefaultActiveContainer;
 
         /// <summary>
-        ///     이펙트 딕셔너리
-        /// </summary>
-        [SerializeField]
-        private SerializableDictionaryBase<EffectType, PoolingMeta<ParticleImage>> mParticleImageDictionary;
-
-        /// <summary>
         ///     풀링 파티클 풀
         /// </summary>
         private readonly Dictionary<EffectType, IEffectPool> _mPoolingParticlePool = new();
+
+        /// <summary>
+        ///     이펙트 딕셔너리
+        /// </summary>
+        [SerializeField]
+        private SerializableDictionary<EffectType, PoolingMeta<ParticleSystemWrapper>> mParticleImageDictionary;
 
         private void Awake()
         {
@@ -120,16 +117,16 @@ namespace Effects
         {
             var prefab = GetMeta(effectType).prefab;
 
-            return new UIParticle(
+            return new BaseParticle(
                 Instantiate(prefab, container), isAutoRelease);
         }
 
         /// <summary>
-        ///     파티클 이미지 메타 가져오기
+        ///     파티클 메타 가져오기
         /// </summary>
         /// <param name="effectType">이펙트 타입</param>
         /// <returns>파티클 이미지 메타</returns>
-        private PoolingMeta<ParticleImage> GetMeta(EffectType effectType)
+        private PoolingMeta<ParticleSystemWrapper> GetMeta(EffectType effectType)
         {
             return mParticleImageDictionary[effectType];
         }
@@ -192,14 +189,14 @@ namespace Effects
         /// <summary>
         ///     풀링 파티클 풀 생성
         /// </summary>
-        /// <param name="particleImagePrefab">파티클 이미지 프리팹</param>
+        /// <param name="particlePrefab">파티클 이미지 프리팹</param>
         /// <param name="container">릴리즈 되었을 때 이동할 컨테이너</param>
         /// <param name="activeContainer">풀링 됐을 때 옮겨 갈 부모</param>
         /// <returns></returns>
-        private static UIParticleEffectPool CreatePoolingParticlePool(
-            ParticleImage particleImagePrefab, Transform container, Transform activeContainer)
+        private static ParticleEffectPool CreatePoolingParticlePool(
+            ParticleSystemWrapper particlePrefab, Transform container, Transform activeContainer)
         {
-            return new UIParticleEffectPool(particleImagePrefab, container, activeContainer);
+            return new ParticleEffectPool(particlePrefab, container, activeContainer);
         }
     }
 }

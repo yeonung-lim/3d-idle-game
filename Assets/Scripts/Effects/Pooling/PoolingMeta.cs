@@ -1,5 +1,4 @@
 using System;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace Effects.Pooling
@@ -25,13 +24,13 @@ namespace Effects.Pooling
         /// <summary>
         ///     특정 풀링 컨테이너
         /// </summary>
-        [ShowIf("@containerType == PoolingContainerType.Specific")]
+        // [ShowIf("@containerType == PoolingContainerType.Specific")]
         public Transform container;
 
         /// <summary>
         ///     특정 활성화 풀링 컨테이너
         /// </summary>
-        [ShowIf("@containerType == PoolingContainerType.Specific")]
+        // [ShowIf("@containerType == PoolingContainerType.Specific")]
         public Transform activeContainer;
     }
 }

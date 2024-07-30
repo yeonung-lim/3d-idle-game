@@ -1,7 +1,5 @@
 ﻿using System;
-using RotaryHeart.Lib.SerializableDictionary;
 using UnityEngine;
-using USingleton.AutoSingleton;
 
 namespace Sound
 {
@@ -34,13 +32,12 @@ namespace Sound
     /// <summary>
     ///     UI 오디오 클립들을 관리하는 클래스입니다.
     /// </summary>
-    [Singleton(nameof(UIAudioClips))]
     public class UIAudioClips : MonoBehaviour
     {
         /// <summary>
         ///     UI 오디오 클립들을 저장하는 딕셔너리입니다.
         /// </summary>
-        [SerializeField] private SerializableDictionaryBase<UIAudioType, UIAudioInfo> audioClipsDict;
+        [SerializeField] private SerializableDictionary<UIAudioType, UIAudioInfo> audioClipsDict;
 
         /// <summary>
         ///     UI 오디오 정보를 반환합니다.

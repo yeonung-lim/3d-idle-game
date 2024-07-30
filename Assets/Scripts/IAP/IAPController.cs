@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using AsyncInitialize;
 using Cysharp.Threading.Tasks;
-using Load;
 using UniRx;
+using UnityCommunity.UnitySingleton;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.Purchasing;
-using USingleton.AutoSingleton;
 
 namespace IAP
 {
@@ -77,8 +76,7 @@ namespace IAP
     ///     IAP 컨트롤러
     ///     인앱 결제를 관리합니다.
     /// </summary>
-    [Singleton(nameof(IAPController))]
-    public class IAPController : MonoBehaviour, IAsyncInit
+    public class IAPController : PersistentMonoSingleton<IAPController>, IAsyncInit
     {
         /// <summary>
         ///     복원 중인지 여부
@@ -133,7 +131,7 @@ namespace IAP
         /// <summary>
         ///     초기화 프로세스를 시작합니다.
         /// </summary>
-        public void StartProcess()
+        public void StartInitialize()
         {
             if (_mbInitialized) return;
 

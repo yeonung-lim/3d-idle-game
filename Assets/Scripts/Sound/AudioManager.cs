@@ -1,21 +1,17 @@
 ﻿using System;
 using Ads;
-using Data;
+using AsyncInitialize;
 using Hellmade.Sound;
-using Load;
-using Sirenix.OdinInspector;
 using UniRx;
+using UnityCommunity.UnitySingleton;
 using UnityEngine;
-using USingleton.AutoSingleton;
-using Singleton = USingleton.Singleton;
 
 namespace Sound
 {
     /// <summary>
     ///     사운드를 관리하는 클래스입니다.
     /// </summary>
-    [Singleton(nameof(AudioManager))]
-    public class AudioManager : MonoBehaviour, IAsyncInit, IResettableAudioController
+    public class AudioManager : PersistentMonoSingleton<AudioManager>, IResettableAudioController
     {
         /// <summary>
         ///     UI 사운드 재생 간격 정보입니다.
@@ -52,6 +48,14 @@ namespace Sound
         /// </summary>
         private bool _isInitialized;
 
+        /// <summary>
+        ///     초기화를 재설정합니다.
+        /// </summary>
+        public void Reset()
+        {
+            _isInitialized = false;
+        }
+
         private void Start()
         {
             globalBGMVolume.Subscribe(x => EazySoundManager.GlobalMusicVolume = x).AddTo(this);
@@ -84,17 +88,9 @@ namespace Sound
 
             PlayMusic(BGMAudioType.TitleMusic, true);
 
-            Singleton.Instance<AdManager>().SetAudioController(this);
+            AdManager.Instance.SetAudioController(this);
 
             _isInitialized = true;
-        }
-
-        /// <summary>
-        ///     초기화를 재설정합니다.
-        /// </summary>
-        public void Reset()
-        {
-            _isInitialized = false;
         }
 
         /// <summary>

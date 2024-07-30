@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.UI;
-using USingleton;
 
 namespace Sound
 {
@@ -12,8 +11,8 @@ namespace Sound
     {
         private void Awake()
         {
-            GetComponent<Button>().AddListener(this, () =>
-                Singleton.Instance<AudioManager>().PlaySfx(UIAudioType.ButtonClick));
+            GetComponent<Button>().onClick.AddListener(() =>
+                AudioManager.Instance.PlaySfx(UIAudioType.ButtonClick));
         }
     }
 }
