@@ -1,21 +1,11 @@
 using System;
-using UnityEngine;
 using GoogleMobileAds.Api;
+using UnityEngine;
 
-namespace GoogleMobileAds.Sample
+namespace GoogleMobileAds.Samples
 {
-    /// <summary>
-    /// Demonstrates how to use Google Mobile Ads interstitial ads.
-    /// </summary>
-    [AddComponentMenu("GoogleMobileAds/Samples/InterstitialAdController")]
-    public class InterstitialAdController : MonoBehaviour
+    public class InterstitialAdController
     {
-        /// <summary>
-        /// UI element activated when an ad is ready to show.
-        /// </summary>
-        public GameObject AdLoadedStatus;
-
-        // These ad units are configured to always serve test ads.
 #if UNITY_ANDROID
         private const string _adUnitId = "ca-app-pub-3940256099942544/1033173712";
 #elif UNITY_IPHONE
@@ -26,132 +16,125 @@ namespace GoogleMobileAds.Sample
 
         private InterstitialAd _interstitialAd;
 
+        private readonly Action _onAdOpened;
+        private readonly Action _onAdClosed;
+
+        internal InterstitialAdController(Action onAdOpened, Action onAdClosed)
+        {
+            _onAdOpened = onAdOpened;
+            _onAdClosed = onAdClosed;
+        }
+
         /// <summary>
-        /// Loads the ad.
+        ///     광고를 로드합니다.
         /// </summary>
         public void LoadAd()
         {
-            // Clean up the old ad before loading a new one.
-            if (_interstitialAd != null)
-            {
-                DestroyAd();
-            }
+            // 새 광고를 로드하기 전에 이전 광고를 정리합니다.
+            if (_interstitialAd != null) DestroyAd();
 
             Debug.Log("Loading interstitial ad.");
 
-            // Create our request used to load the ad.
+            // 광고를 로드하는 데 사용되는 요청을 생성합니다.
             var adRequest = new AdRequest();
 
-            // Send the request to load the ad.
-            InterstitialAd.Load(_adUnitId, adRequest, (InterstitialAd ad, LoadAdError error) =>
+            // 광고 로딩 요청을 보냅니다.
+            InterstitialAd.Load(_adUnitId, adRequest, (ad, error) =>
             {
-                // If the operation failed with a reason.
+                // 작업이 이유와 함께 실패한 경우.
                 if (error != null)
                 {
                     Debug.LogError("Interstitial ad failed to load an ad with error : " + error);
                     return;
                 }
-                // If the operation failed for unknown reasons.
-                // This is an unexpected error, please report this bug if it happens.
+
+                // 알 수 없는 이유로 작업이 실패한 경우.
+                // 예기치 않은 오류이므로 이 버그가 발생하면 신고해 주세요.
                 if (ad == null)
                 {
-                    Debug.LogError("Unexpected error: Interstitial load event fired with null ad and null error.");
+                    Debug.LogError("예기치 않은 오류가 발생했습니다: 널 광고 및 널 오류와 함께 삽입 광고 로드 이벤트가 실행되었습니다.");
                     return;
                 }
 
-                // The operation completed successfully.
-                Debug.Log("Interstitial ad loaded with response : " + ad.GetResponseInfo());
+                // 작업이 성공적으로 완료되었습니다.
+                Debug.Log("전면 광고가 응답과 함께 로드되었습니다 : " + ad.GetResponseInfo());
                 _interstitialAd = ad;
 
-                // Register to ad events to extend functionality.
+                // 광고 이벤트에 등록하여 기능을 확장하세요.
                 RegisterEventHandlers(ad);
-
-                // Inform the UI that the ad is ready.
-                AdLoadedStatus?.SetActive(true);
             });
         }
 
         /// <summary>
-        /// Shows the ad.
+        ///     광고를 표시합니다.
         /// </summary>
         public void ShowAd()
         {
-            if (_interstitialAd != null && _interstitialAd.CanShowAd())
+            if (IsCanShowAd)
             {
-                Debug.Log("Showing interstitial ad.");
+                Debug.Log("전면 광고 표시.");
                 _interstitialAd.Show();
             }
             else
             {
-                Debug.LogError("Interstitial ad is not ready yet.");
+                Debug.LogError("전면 광고는 아직 준비되지 않았습니다.");
             }
-
-            // Inform the UI that the ad is not ready.
-            AdLoadedStatus?.SetActive(false);
         }
 
+        public bool IsCanShowAd => _interstitialAd != null && _interstitialAd.CanShowAd();
+
         /// <summary>
-        /// Destroys the ad.
+        ///     광고를 삭제합니다.
         /// </summary>
         public void DestroyAd()
         {
-            if (_interstitialAd != null)
-            {
-                Debug.Log("Destroying interstitial ad.");
-                _interstitialAd.Destroy();
-                _interstitialAd = null;
-            }
+            if (_interstitialAd == null) return;
 
-            // Inform the UI that the ad is not ready.
-            AdLoadedStatus?.SetActive(false);
+            Debug.Log("전면 광고 삭제하기.");
+            _interstitialAd.Destroy();
+            _interstitialAd = null;
         }
 
         /// <summary>
-        /// Logs the ResponseInfo.
+        ///     응답 정보를 기록합니다.
         /// </summary>
         public void LogResponseInfo()
         {
-            if (_interstitialAd != null)
-            {
-                var responseInfo = _interstitialAd.GetResponseInfo();
-                UnityEngine.Debug.Log(responseInfo);
-            }
+            if (_interstitialAd == null) return;
+
+            var responseInfo = _interstitialAd.GetResponseInfo();
+            Debug.Log(responseInfo);
         }
 
         private void RegisterEventHandlers(InterstitialAd ad)
         {
-            // Raised when the ad is estimated to have earned money.
-            ad.OnAdPaid += (AdValue adValue) =>
-            {
-                Debug.Log(String.Format("Interstitial ad paid {0} {1}.",
-                    adValue.Value,
-                    adValue.CurrencyCode));
-            };
-            // Raised when an impression is recorded for an ad.
-            ad.OnAdImpressionRecorded += () =>
-            {
-                Debug.Log("Interstitial ad recorded an impression.");
-            };
-            // Raised when a click is recorded for an ad.
-            ad.OnAdClicked += () =>
-            {
-                Debug.Log("Interstitial ad was clicked.");
-            };
-            // Raised when an ad opened full screen content.
+            // 광고가 수익을 올린 것으로 추정될 때 발생합니다.
+            ad.OnAdPaid += adValue => { Debug.Log($"전면 광고 수익 : {adValue.Value} {adValue.CurrencyCode}."); };
+
+            // 광고에 대한 노출이 기록될 때 발생합니다.
+            ad.OnAdImpressionRecorded += () => { Debug.Log("전면 광고 노출을 기록했습니다."); };
+
+            // 광고 클릭이 기록될 때 발생합니다.
+            ad.OnAdClicked += () => { Debug.Log("전면 광고가 클릭되었습니다."); };
+
+            // 광고가 전체 화면 콘텐츠를 열었을 때 발생합니다.
             ad.OnAdFullScreenContentOpened += () =>
             {
-                Debug.Log("Interstitial ad full screen content opened.");
+                _onAdOpened?.Invoke();
+                Debug.Log("전면 광고 전체 화면 콘텐츠가 열렸습니다.");
             };
-            // Raised when the ad closed full screen content.
+            // 광고가 전체 화면 콘텐츠를 닫을 때 발생합니다.
             ad.OnAdFullScreenContentClosed += () =>
             {
-                Debug.Log("Interstitial ad full screen content closed.");
+                _onAdClosed?.Invoke();
+                Debug.Log("전면 광고 전체 화면 콘텐츠가 닫혔습니다.");
             };
-            // Raised when the ad failed to open full screen content.
-            ad.OnAdFullScreenContentFailed += (AdError error) =>
+
+            // 광고가 전체 화면 콘텐츠를 열지 못했을 때 발생합니다.
+            ad.OnAdFullScreenContentFailed += error =>
             {
-                Debug.LogError("Interstitial ad failed to open full screen content with error : "
-                    + error);
+                Debug.LogError("전면 광고가 오류와 함께 전체 화면 콘텐츠를 열지 못했습니다 : "
+                               + error);
             };
         }
     }

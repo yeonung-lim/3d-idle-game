@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using AsyncInitialize;
 using Cysharp.Threading.Tasks;
 using UniRx;
@@ -135,23 +136,13 @@ namespace IAP
         {
             if (_mbInitialized) return;
 
-            Init().Forget();
+            IAPManager.Instance.InitializeIAPManager(InitializeResult);
+
+            _mbInitialized = true;
         }
 
         public void Reset()
         {
-        }
-
-        /// <summary>
-        ///     초기화
-        /// </summary>
-        private async UniTaskVoid Init()
-        {
-            if (_mbInitialized) return;
-
-            await IAPManager.Instance.InitializeIAPManager(InitializeResult);
-
-            _mbInitialized = true;
         }
 
         /// <summary>
@@ -172,7 +163,7 @@ namespace IAP
             await UniTask.WaitUntil(() => _isRestoring == false,
                 cancellationToken: this.GetCancellationTokenOnDestroy());
 
-            if (IAPManager.Instance.debug) Debug.Log("Restore purchases completed");
+            if (IAPManager.Instance.Debug) Debug.Log("Restore purchases completed");
         }
 
         /// <summary>
@@ -189,13 +180,12 @@ namespace IAP
             _mbPurchaseInProgress = true;
             var iapStatus = IAPOperationStatus.Fail;
             var resultMessage = string.Empty;
-            StoreProduct sProduct = null;
             IAPManager.Instance.BuyProduct(productName, (status, message, storeProduct) =>
             {
                 ProductBought(status, message, storeProduct);
                 iapStatus = status;
                 resultMessage = message;
-                sProduct = storeProduct;
+                _ = storeProduct;
 
                 _mbPurchaseInProgress = false;
             });
@@ -206,10 +196,10 @@ namespace IAP
             switch (iapStatus)
             {
                 case IAPOperationStatus.Success:
-                    if (IAPManager.Instance.debug) Debug.Log($"Buy product ({productName}) completed");
+                    if (IAPManager.Instance.Debug) Debug.Log($"Buy product ({productName}) completed");
                     return BuyResult.Success;
                 case IAPOperationStatus.Fail:
-                    if (IAPManager.Instance.debug) Debug.Log($"Buy product failed: {resultMessage}");
+                    if (IAPManager.Instance.Debug) Debug.Log($"Buy product failed: {resultMessage}");
                     return BuyResult.UnknownError;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -275,11 +265,11 @@ namespace IAP
             if (status == IAPOperationStatus.Fail)
             {
                 //en error occurred in the buy process, log the message for more details
-                if (IAPManager.Instance.debug) Debug.Log("Buy product failed: " + message);
+                if (IAPManager.Instance.Debug) Debug.Log("Buy product failed: " + message);
                 return;
             }
 
-            if (IAPManager.Instance.debug)
+            if (IAPManager.Instance.Debug)
                 Debug.Log("Buy product completed: " + product.localizedTitle + " receive value: " + product.value);
 
             var eShopProduct = IAPManager.Instance.ConvertNameToShopProduct(product.productName);
@@ -322,7 +312,7 @@ namespace IAP
                 OnInitializeFailed();
             }
 
-            if (IAPManager.Instance.debug) Debug.Log("Init status: " + status + " message " + message);
+            if (IAPManager.Instance.Debug) Debug.Log("Init status: " + status + " message " + message);
         }
 
         /// <summary>

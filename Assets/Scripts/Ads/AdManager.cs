@@ -10,6 +10,26 @@ using UnityEngine;
 namespace Ads
 {
     /// <summary>
+    ///     젼면 광고 결과
+    /// </summary>
+    public struct InterstitialAdsResult
+    {
+        /// <summary>
+        ///     광고가 보여졌는지 여부
+        /// </summary>
+        public readonly bool IsShown;
+
+        /// <summary>
+        ///     전면 광고 결과
+        /// </summary>
+        /// <param name="isShown"></param>
+        public InterstitialAdsResult(bool isShown)
+        {
+            IsShown = isShown;
+        }
+    }
+
+    /// <summary>
     ///     리워드 광고 결과
     /// </summary>
     public struct RewardAdsResult
@@ -28,99 +48,6 @@ namespace Ads
         {
             IsShown = isShown;
             IsRewarded = isRewarded;
-        }
-    }
-
-    /// <summary>
-    ///     배너의 마지막 상태를 업데이트 해주는 클래스
-    /// </summary>
-    public class LastBannerPropertyUpdater
-    {
-        /// <summary>
-        ///     처분 가능한 객체
-        /// </summary>
-        private IDisposable _disposable;
-
-        /// <summary>
-        ///     마지막 배너 속성
-        /// </summary>
-        public BannerProperty LastBannerProperty;
-
-        /// <summary>
-        ///     생성자에서 BannerProperty를 구독해 LastBannerProperty를 업데이트 합니다.
-        /// </summary>
-        public LastBannerPropertyUpdater()
-        {
-            _disposable = MessageBroker.Default.Receive<BannerProperty>().Subscribe(x => { LastBannerProperty = x; });
-        }
-
-        /// <summary>
-        ///     소멸자에서 구독을 해제합니다.
-        /// </summary>
-        ~LastBannerPropertyUpdater()
-        {
-            _disposable?.Dispose();
-            _disposable = null;
-        }
-    }
-
-    /// <summary>
-    ///     배너 속성
-    /// </summary>
-    public struct BannerProperty
-    {
-        /// <summary>
-        ///     마지막 배너 속성 업데이트 클래스
-        /// </summary>
-        private static readonly LastBannerPropertyUpdater LastBannerPropertyUpdater = new();
-
-        /// <summary>
-        ///     배너 위치
-        /// </summary>
-        public readonly BannerPosition BannerPosition;
-
-        /// <summary>
-        ///     배너 크기
-        /// </summary>
-        public readonly Vector2 DeltaSize;
-
-        /// <summary>
-        ///     배너가 열려있는지 여부
-        /// </summary>
-        public readonly bool IsOpened;
-
-        /// <summary>
-        ///     생성자
-        /// </summary>
-        /// <param name="deltaSize">배너 크기</param>
-        /// <param name="bannerPosition">배너 위치</param>
-        /// <param name="isOpened">배너 열림 여부</param>
-        public BannerProperty(Vector2 deltaSize, BannerPosition bannerPosition, bool isOpened)
-        {
-            DeltaSize = deltaSize;
-            BannerPosition = bannerPosition;
-            IsOpened = isOpened;
-        }
-
-        /// <summary>
-        ///     마지막 배너 속성
-        /// </summary>
-        public static BannerProperty LastBannerProperty => LastBannerPropertyUpdater.LastBannerProperty;
-
-        /// <summary>
-        ///     배너가 닫혀있는 상태
-        /// </summary>
-        public static BannerProperty Closed => new(Vector2.zero, BannerPosition.BOTTOM, false);
-
-        /// <summary>
-        ///     배너가 열려있는 상태
-        /// </summary>
-        /// <param name="deltaSize">배너 크기</param>
-        /// <param name="bannerPosition">배너 위치</param>
-        /// <returns></returns>
-        public static BannerProperty Open(Vector2 deltaSize, BannerPosition bannerPosition)
-        {
-            return new BannerProperty(deltaSize, bannerPosition, true);
         }
     }
 
@@ -153,6 +80,11 @@ namespace Ads
         private bool _isInitialized;
 
         /// <summary>
+        ///     광고 제거가 되었는지 여부
+        /// </summary>
+        private bool _isRemoveAds;
+
+        /// <summary>
         ///     전면 광고가 보여지고 있는지 여부
         /// </summary>
         private bool _isShowingInterstitial;
@@ -161,6 +93,11 @@ namespace Ads
         ///     광고 제거 구독
         /// </summary>
         private IDisposable _removeAdsDisposable;
+
+        /// <summary>
+        ///     광고 컨트롤러
+        /// </summary>
+        private IAdController adController;
 
         /// <summary>
         ///     광고 제거 아이템을 가지고 있는지 여부
@@ -208,19 +145,12 @@ namespace Ads
             if (_isInitialized)
                 return;
 
-            var cancelToken = this.GetCancellationTokenOnDestroy();
-
-            Advertisements.Instance.Initialize();
-            await UniTask.WaitUntil(() => CustomAppLovin.IsInitializedComplete, cancellationToken: cancelToken);
+            adController.LoadRewardAd();
+            adController.LoadInterstitialAd();
 
             _isInitialized = true;
 
-            RegisterOnAdRevenue();
-
             IAPController.Instance.SubscribeBought(removeAdsProduct, SetRemoveAds)?.AddTo(this);
-
-            if (!HasRemoveAds)
-                InitAndShowBanner();
         }
 
         public void Reset()
@@ -253,102 +183,19 @@ namespace Ads
         }
 
         /// <summary>
-        ///     배너를 초기화하고 보여줍니다.
-        /// </summary>
-        private void InitAndShowBanner()
-        {
-            Advertisements.Instance
-                .ObserveEveryValueChanged(x => x.IsBannerOnScreen())
-                .Where(x => !x)
-                .Subscribe(x =>
-                    PublishBannerProperty(BannerProperty.Closed)
-                ).AddTo(this);
-
-            ShowBanner();
-        }
-
-        /// <summary>
-        ///     배너 속성을 게시합니다.
-        /// </summary>
-        /// <param name="bannerProperty"></param>
-        private void PublishBannerProperty(BannerProperty bannerProperty)
-        {
-            MessageBroker.Default.Publish(bannerProperty);
-        }
-
-        /// <summary>
-        ///     사용자 동의를 설정합니다.
-        /// </summary>
-        /// <param name="consent"></param>
-        public void SetUserConsent(bool consent)
-        {
-            if (_isInitialized == false)
-            {
-                Debug.LogWarning("Ads not initialized");
-                return;
-            }
-
-            Advertisements.Instance.SetUserConsent(consent);
-        }
-
-        /// <summary>
-        ///     CCPA 동의를 설정합니다.
-        /// </summary>
-        /// <param name="consent"></param>
-        public void SetCCPAConsent(bool consent)
-        {
-            if (_isInitialized == false)
-            {
-                Debug.LogWarning("Ads not initialized");
-                return;
-            }
-
-            Advertisements.Instance.SetCCPAConsent(consent);
-        }
-
-        /// <summary>
-        ///     배너 광고를 보여줍니다.
-        /// </summary>
-        /// <param name="position"></param>
-        public void ShowBanner(BannerPosition position = BannerPosition.BOTTOM)
-        {
-            if (_isInitialized == false)
-            {
-                Debug.LogWarning("Ads not initialized");
-                return;
-            }
-
-            Advertisements.Instance.ShowBanner(position, BannerType.Adaptive);
-        }
-
-        /// <summary>
-        ///     배너 광고를 숨깁니다.
-        /// </summary>
-        public void HideBanner()
-        {
-            if (_isInitialized == false)
-            {
-                Debug.LogWarning("Ads not initialized");
-                return;
-            }
-
-            Advertisements.Instance.HideBanner();
-        }
-
-        /// <summary>
         ///     전면 광고를 보여줍니다.
         /// </summary>
         public async UniTask ShowInterstitial()
         {
             if (_isInitialized == false)
             {
-                Debug.LogWarning("Ads not initialized");
+                Debug.LogWarning("초기화가 되지 않았습니다.");
                 return;
             }
 
-            if (Advertisements.Instance.IsInterstitialAvailable() == false)
+            if (adController.IsInterstitialAdAvailable() == false)
             {
-                Debug.LogWarning("Interstitial not available");
+                Debug.LogWarning("전면 광고를 사용할 수 없습니다.");
                 return;
             }
 
@@ -357,9 +204,9 @@ namespace Ads
 
             ResetAudioPrepare();
 
-            Advertisements.Instance.ShowInterstitial(result =>
+            adController.ShowInterstitialAd(result =>
             {
-                Debug.Log("Interstitial closed");
+                Debug.Log("전면 광고 닫힘");
                 closed = true;
             });
 
@@ -378,34 +225,34 @@ namespace Ads
         {
             if (_isInitialized == false)
             {
-                Debug.LogWarning("Ads not initialized");
+                Debug.LogWarning("초기화가 되지 않았습니다.");
                 return new RewardAdsResult(false, false);
             }
 
-            if (Advertisements.Instance.IsRewardVideoAvailable() == false)
+            if (adController.IsRewardAdAvailable() == false)
             {
-                Debug.LogWarning("Rewarded video not available");
+                Debug.LogWarning("보상 광고를 사용할 수 없습니다.");
                 return new RewardAdsResult(false, false);
             }
 
             var cancelToken = this.GetCancellationTokenOnDestroy();
             var closed = false;
-            var isRewarded = false;
+            var rewardAdsResult = new RewardAdsResult(false, false);
 
             ResetAudioPrepare();
 
-            Advertisements.Instance.ShowRewardedVideo(result =>
+            adController.ShowRewardAd(result =>
             {
-                Debug.Log("Rewarded video closed");
+                Debug.Log("보상 광고 닫힘");
+                rewardAdsResult = result;
                 closed = true;
-                isRewarded = result;
             });
 
             await UniTask.WaitUntil(() => closed, cancellationToken: cancelToken);
 
             ResetAudio();
 
-            return new RewardAdsResult(true, isRewarded);
+            return rewardAdsResult;
         }
 
         /// <summary>
@@ -417,11 +264,11 @@ namespace Ads
         {
             if (_isInitialized == false)
             {
-                Debug.LogWarning("Ads not initialized");
+                Debug.LogWarning("초기화가 되지 않았습니다.");
                 return;
             }
 
-            Advertisements.Instance.RemoveAds(removeAds);
+            _isRemoveAds = removeAds;
         }
     }
 }

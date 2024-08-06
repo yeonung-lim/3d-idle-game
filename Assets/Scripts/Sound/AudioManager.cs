@@ -2,7 +2,6 @@
 using Ads;
 using AsyncInitialize;
 using Hellmade.Sound;
-using UniRx;
 using UnityCommunity.UnitySingleton;
 using UnityEngine;
 
@@ -19,14 +18,9 @@ namespace Sound
         [SerializeField] private SoundIntervalInfo uiSoundInterval = new();
 
         /// <summary>
-        ///     전역 BGM 볼륨입니다.
+        ///     BGM 사운드 클립 정보입니다.
         /// </summary>
-        public ReactiveProperty<float> globalBGMVolume = new(1f);
-
-        /// <summary>
-        ///     전역 SFX 볼륨입니다.
-        /// </summary>
-        public ReactiveProperty<float> globalSfxVolume = new(1f);
+        private BGMAudioClips _bgmAudioClips;
 
         /// <summary>
         ///     현재 재생 중인 BGM의 타입입니다.
@@ -49,6 +43,23 @@ namespace Sound
         private bool _isInitialized;
 
         /// <summary>
+        ///     UI 사운드 클립 정보입니다.
+        /// </summary>
+        private UIAudioClips _uiAudioClips;
+
+        internal float GlobalBGMVolume
+        {
+            get => PlayerPrefs.GetFloat("GlobalBGMVolume", 1f);
+            set => PlayerPrefs.SetFloat("GlobalBGMVolume", value);
+        }
+
+        internal float GlobalSFXVolume
+        {
+            get => PlayerPrefs.GetFloat("GlobalSFXVolume", 1f);
+            set => PlayerPrefs.SetFloat("GlobalSFXVolume", value);
+        }
+
+        /// <summary>
         ///     초기화를 재설정합니다.
         /// </summary>
         public void Reset()
@@ -58,39 +69,8 @@ namespace Sound
 
         private void Start()
         {
-            globalBGMVolume.Subscribe(x => EazySoundManager.GlobalMusicVolume = x).AddTo(this);
-            globalSfxVolume.Subscribe(x => EazySoundManager.GlobalUISoundsVolume = x).AddTo(this);
-        }
-
-#if UNITY_EDITOR
-        private void OnValidate()
-        {
-            globalBGMVolume.SetValueAndForceNotify(Mathf.Clamp01(globalBGMVolume.Value));
-            globalSfxVolume.SetValueAndForceNotify(Mathf.Clamp01(globalSfxVolume.Value));
-        }
-#endif
-        /// <summary>
-        ///     비동기 작업을 반환합니다.
-        /// </summary>
-        /// <returns></returns>
-        public CustomizableAsyncOperation GetAsyncOperation()
-        {
-            return CustomizableAsyncOperation.Create(() => _isInitialized);
-        }
-
-        /// <summary>
-        ///     사운드 관련 초기화 작업을 시작합니다.
-        /// </summary>
-        public void StartProcess()
-        {
-            SetGlobalBGMVolume(StaticData.Option.BgmVolume);
-            SetGlobalSfxVolume(StaticData.Option.SfxVolume);
-
-            PlayMusic(BGMAudioType.TitleMusic, true);
-
-            AdManager.Instance.SetAudioController(this);
-
-            _isInitialized = true;
+            _uiAudioClips = Resources.Load<UIAudioClips>("UIAudioClips");
+            _bgmAudioClips = Resources.Load<BGMAudioClips>("BGMAudioClips");
         }
 
         /// <summary>
@@ -131,13 +111,37 @@ namespace Sound
         }
 
         /// <summary>
+        ///     비동기 작업을 반환합니다.
+        /// </summary>
+        /// <returns></returns>
+        public CustomizableAsyncOperation GetAsyncOperation()
+        {
+            return CustomizableAsyncOperation.Create(() => _isInitialized);
+        }
+
+        /// <summary>
+        ///     사운드 관련 초기화 작업을 시작합니다.
+        /// </summary>
+        public void StartProcess()
+        {
+            EazySoundManager.GlobalMusicVolume = GlobalBGMVolume;
+            EazySoundManager.GlobalUISoundsVolume = GlobalSFXVolume;
+
+            PlayMusic(BGMAudioType.TitleMusic, true);
+
+            AdManager.Instance.SetAudioController(this);
+
+            _isInitialized = true;
+        }
+
+        /// <summary>
         ///     BGM과 SFX 전역 볼륨을 동시에 설정합니다.
         /// </summary>
         /// <param name="volume"></param>
         public void SetGlobalVolume(float volume)
         {
-            globalBGMVolume.Value = volume;
-            globalSfxVolume.Value = volume;
+            SetGlobalBGMVolume(volume);
+            SetGlobalSfxVolume(volume);
         }
 
         /// <summary>
@@ -146,7 +150,8 @@ namespace Sound
         /// <param name="volume"></param>
         public void SetGlobalBGMVolume(float volume)
         {
-            globalBGMVolume.Value = volume;
+            GlobalBGMVolume = volume;
+            EazySoundManager.GlobalMusicVolume = volume;
         }
 
         /// <summary>
@@ -155,17 +160,17 @@ namespace Sound
         /// <param name="volume"></param>
         public void SetGlobalSfxVolume(float volume)
         {
-            globalSfxVolume.Value = volume;
+            GlobalSFXVolume = volume;
+            EazySoundManager.GlobalUISoundsVolume = volume;
         }
 
         /// <summary>
         ///     효과음을 재생합니다.
         /// </summary>
         /// <param name="soundType">재생할 효과음 타입</param>
-        /// <param name="loop">반복 여부</param>
         /// <param name="minSoundInterval">최소 사운드 재생 간격</param>
         /// <returns>사운드 인덱스</returns>
-        public int PlaySfx(UIAudioType soundType, bool loop = false, float? minSoundInterval = null)
+        public int PlaySfx(UIAudioType soundType, float? minSoundInterval = null)
         {
             var interval = minSoundInterval ?? uiSoundInterval.minSoundInterval;
             if (Time.unscaledTime - uiSoundInterval.lastSoundPlayTime < interval)
@@ -177,13 +182,13 @@ namespace Sound
             if (soundType == UIAudioType.None)
                 return -1;
 
-            var audioInfo = Singleton.Instance<UIAudioClips>().GetAudioInfo(soundType);
+            var audioInfo = _uiAudioClips.GetAudioInfo(soundType);
             if (audioInfo == null) return -1;
 
             uiSoundInterval.lastSoundPlayTime = Time.time;
 
             Debug.Log($"Play SFX: {soundType}");
-            return EazySoundManager.PlayUISound(audioInfo.clip, audioInfo.volume, loop);
+            return EazySoundManager.PlayUISound(audioInfo.clip, audioInfo.volume);
         }
 
         /// <summary>
@@ -193,7 +198,7 @@ namespace Sound
         /// <returns>재생 시간</returns>
         public float GetSfxAudioDuration(UIAudioType type)
         {
-            var clip = Singleton.Instance<UIAudioClips>().GetAudioInfo(type)?.clip;
+            var clip = _uiAudioClips.GetAudioInfo(type)?.clip;
             if (clip == null) return 0f;
 
             return clip.length;
@@ -214,7 +219,7 @@ namespace Sound
         /// <param name="type">효과음 타입</param>
         public void StopSfx(UIAudioType type)
         {
-            var clip = Singleton.Instance<UIAudioClips>().GetAudioInfo(type)?.clip;
+            var clip = _uiAudioClips.GetAudioInfo(type)?.clip;
             if (clip == null) return;
 
             EazySoundManager.GetUISoundAudio(clip).Stop();
@@ -241,7 +246,7 @@ namespace Sound
         /// <returns>사운드 인덱스</returns>
         public int PlayMusic(BGMAudioType soundType, bool persist)
         {
-            var audioInfo = Singleton.Instance<BGMAudioClips>().GetAudioInfo(soundType);
+            var audioInfo = _bgmAudioClips.GetAudioInfo(soundType);
             if (audioInfo == null) return -1;
 
             if (_bgmSource != -1)
@@ -263,7 +268,7 @@ namespace Sound
         private class SoundIntervalInfo
         {
             [SerializeField] [Min(0f)] public float minSoundInterval = 0.075f;
-            [ReadOnly] public float lastSoundPlayTime;
+            public float lastSoundPlayTime;
         }
     }
 }

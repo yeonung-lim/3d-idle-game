@@ -1,72 +1,68 @@
-using GoogleMobileAds.Ump.Api;
 using System;
+using GoogleMobileAds.Ump.Api;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace GoogleMobileAds.Samples
 {
     /// <summary>
-    /// Helper class that implements consent using the Google User Messaging Platform (UMP) SDK.
+    ///     Google 사용자 메시징 플랫폼(UMP) SDK를 사용하여 동의를 구현하는 헬퍼 클래스입니다.
     /// </summary>
     public class GoogleMobileAdsConsentController : MonoBehaviour
     {
+        [SerializeField] [Tooltip("사용자 동의 및 개인정보 보호 설정을 표시하는 버튼입니다.")]
+        private Button _privacyButton;
+
+        [SerializeField] [Tooltip("게임 오브젝트에 오류 팝업이 표시됩니다.")]
+        private GameObject _errorPopup;
+
+        [SerializeField] [Tooltip("오류 팝업의 오류 메시지입니다,")]
+        private Text _errorText;
+
         /// <summary>
-        /// If true, it is safe to call MobileAds.Initialize() and load Ads.
+        ///     true이면 MobileAds.Initialize()를 호출하고 광고를 로드해도 안전합니다.
         /// </summary>
         public bool CanRequestAds => ConsentInformation.CanRequestAds();
 
-        [SerializeField, Tooltip("Button to show user consent and privacy settings.")]
-        private Button _privacyButton;
-
-        [SerializeField, Tooltip("GameObject with the error popup.")]
-        private GameObject _errorPopup;
-
-        [SerializeField, Tooltip("Error message for the error popup,")]
-        private Text _errorText;
-
         private void Start()
         {
-            // Disable the error popup,
-            if (_errorPopup != null)
-            {
-                _errorPopup.SetActive(false);
-            }
+            // 오류 팝업을 비활성화합니다,
+            if (_errorPopup != null) _errorPopup.SetActive(false);
         }
 
         /// <summary>
-        /// Startup method for the Google User Messaging Platform (UMP) SDK
-        /// which will run all startup logic including loading any required
-        /// updates and displaying any required forms.
+        ///     구글 사용자 메시징 플랫폼(UMP) SDK의 시작 방법
+        ///     필요한 모든 로딩을 포함하여 모든 시작 로직을 실행합니다.
+        ///     업데이트를 로드하고 필요한 양식을 표시하는 등 모든 시작 로직을 실행합니다.
         /// </summary>
         public void GatherConsent(Action<string> onComplete)
         {
-            Debug.Log("Gathering consent.");
+            Debug.Log("동의 수집");
 
             var requestParameters = new ConsentRequestParameters
             {
-                // False means users are not under age.
+                // False는 사용자가 미성년자가 아님을 의미합니다.
                 TagForUnderAgeOfConsent = false,
                 ConsentDebugSettings = new ConsentDebugSettings
                 {
-                    // For debugging consent settings by geography.
+                    // 지역별로 동의 설정을 디버깅하는 경우.
                     DebugGeography = DebugGeography.Disabled,
-                    // https://developers.google.com/admob/unity/test-ads
-                    TestDeviceHashedIds = GoogleMobileAdsController.TestDeviceIds,
+                    TestDeviceHashedIds = GoogleMobileAdsController.TestDeviceIds
                 }
             };
 
-            // Combine the callback with an error popup handler.
-            onComplete = (onComplete == null)
+            // 콜백을 오류 팝업 핸들러와 결합합니다.
+            onComplete = onComplete == null
                 ? UpdateErrorPopup
                 : onComplete + UpdateErrorPopup;
 
-            // The Google Mobile Ads SDK provides the User Messaging Platform (Google's
-            // IAB Certified consent management platform) as one solution to capture
-            // consent for users in GDPR impacted countries. This is an example and
-            // you can choose another consent management platform to capture consent.
-            ConsentInformation.Update(requestParameters, (FormError updateError) =>
+            // Google 모바일 광고 SDK는 사용자 메시징 플랫폼(Google의
+            // IAB 인증 동의 관리 플랫폼)을 하나의 솔루션으로 제공함으로써
+            // 동의를 수집하는 하나의 솔루션을 제공합니다. 이것은 예시이며
+            // 다른 동의 관리 플랫폼을 선택하여 동의를 수집할 수 있습니다.
+            ConsentInformation.Update(requestParameters, updateError =>
             {
-                // Enable the change privacy settings button.
+                // 개인정보 설정 변경 버튼을 활성화합니다.
                 UpdatePrivacyButton();
 
                 if (updateError != null)
@@ -75,29 +71,26 @@ namespace GoogleMobileAds.Samples
                     return;
                 }
 
-                // Determine the consent-related action to take based on the ConsentStatus.
+                // 동의 상태에 따라 취할 동의 관련 조치를 결정합니다.
                 if (CanRequestAds)
                 {
-                    // Consent has already been gathered or not required.
-                    // Return control back to the user.
+                    // 동의가 이미 수집되었거나 필요하지 않습니다.
+                    // 사용자에게 제어권을 다시 돌려줍니다.
                     onComplete(null);
                     return;
                 }
 
-                // Consent not obtained and is required.
-                // Load the initial consent request form for the user.
-                ConsentForm.LoadAndShowConsentFormIfRequired((FormError showError) =>
+                // 동의를 얻지 못했으며 동의를 받아야 합니다.
+                // 사용자에 대한 초기 동의 요청 양식을 로드합니다.
+                ConsentForm.LoadAndShowConsentFormIfRequired(showError =>
                 {
                     UpdatePrivacyButton();
                     if (showError != null)
                     {
-                        // Form showing failed.
-                        if (onComplete != null)
-                        {
-                            onComplete(showError.Message);
-                        }
+                        // 양식 표시가 실패했습니다.
+                        if (onComplete != null) onComplete(showError.Message);
                     }
-                    // Form showing succeeded.
+                    // 양식 표시가 성공했습니다.
                     else if (onComplete != null)
                     {
                         onComplete(null);
@@ -107,42 +100,35 @@ namespace GoogleMobileAds.Samples
         }
 
         /// <summary>
-        /// Shows the privacy options form to the user.
+        ///     사용자에게 개인정보 보호 옵션 양식을 표시합니다.
         /// </summary>
         /// <remarks>
-        /// Your app needs to allow the user to change their consent status at any time.
-        /// Load another form and store it to allow the user to change their consent status
+        ///     앱에서 사용자가 언제든지 동의 상태를 변경할 수 있도록 허용해야 합니다.
+        ///     사용자가 동의 상태를 변경할 수 있도록 다른 양식을 로드하고 저장합니다.
         /// </remarks>
         public void ShowPrivacyOptionsForm(Action<string> onComplete)
         {
             Debug.Log("Showing privacy options form.");
 
-            // combine the callback with an error popup handler.
-            onComplete = (onComplete == null)
+            // 콜백을 오류 팝업 핸들러와 결합합니다.
+            onComplete = onComplete == null
                 ? UpdateErrorPopup
                 : onComplete + UpdateErrorPopup;
 
-            ConsentForm.ShowPrivacyOptionsForm((FormError showError) =>
+            ConsentForm.ShowPrivacyOptionsForm(showError =>
             {
                 UpdatePrivacyButton();
                 if (showError != null)
-                {
-                    // Form showing failed.
-                    if (onComplete != null)
-                    {
-                        onComplete(showError.Message);
-                    }
-                }
-                // Form showing succeeded.
-                else if (onComplete != null)
-                {
-                    onComplete(null);
-                }
+                    // 양식 표시가 실패했습니다.
+                    onComplete?.Invoke(showError.Message);
+                // 양식 표시가 성공했습니다.
+                else
+                    onComplete?.Invoke(null);
             });
         }
 
         /// <summary>
-        /// Reset ConsentInformation for the user.
+        ///     사용자에 대한 동의 정보 재설정.
         /// </summary>
         public void ResetConsentInformation()
         {
@@ -150,36 +136,22 @@ namespace GoogleMobileAds.Samples
             UpdatePrivacyButton();
         }
 
-        void UpdatePrivacyButton()
+        private void UpdatePrivacyButton()
         {
             if (_privacyButton != null)
-            {
                 _privacyButton.interactable =
                     ConsentInformation.PrivacyOptionsRequirementStatus ==
-                        PrivacyOptionsRequirementStatus.Required;
-            }
+                    PrivacyOptionsRequirementStatus.Required;
         }
 
-        void UpdateErrorPopup(string message)
+        private void UpdateErrorPopup(string message)
         {
-            if (string.IsNullOrEmpty(message))
-            {
-                return;
-            }
+            if (string.IsNullOrEmpty(message)) return;
 
-            if (_errorText != null)
-            {
-                _errorText.text = message;
-            }
+            if (_errorText != null) _errorText.text = message;
 
-            if (_errorPopup != null)
-            {
-                _errorPopup.SetActive(true);
-            }
-            if (_privacyButton != null)
-            {
-                _privacyButton.interactable = true;
-            }
+            if (_errorPopup != null) _errorPopup.SetActive(true);
+            if (_privacyButton != null) _privacyButton.interactable = true;
         }
     }
 }

@@ -23,9 +23,10 @@ namespace Sound
     }
 
     /// <summary>
-    ///     BGM 오디오 클립들을 관리하는 클래스입니다.
+    ///     BGM 오디오 클립 데이터 클래스
     /// </summary>
-    public class BGMAudioClips : MonoBehaviour
+    [CreateAssetMenu(fileName = "BGMAudioClips", menuName = "ScriptableObjects/BGMAudioClips")]
+    public class BGMAudioClips : ScriptableObject
     {
         /// <summary>
         ///     BGM 오디오 클립들을 저장하는 딕셔너리입니다.
