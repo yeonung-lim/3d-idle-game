@@ -187,7 +187,7 @@ namespace Sound
 
             uiSoundInterval.lastSoundPlayTime = Time.time;
 
-            Debug.Log($"Play SFX: {soundType}");
+            Debug.Log($"효과음 재생: {soundType}");
             return EazySoundManager.PlayUISound(audioInfo.clip, audioInfo.volume);
         }
 

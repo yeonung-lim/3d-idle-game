@@ -192,7 +192,7 @@ namespace GoogleMobileAds.Samples
                 var adapterStatusMap = initStatus.getAdapterStatusMap();
                 if (adapterStatusMap != null)
                     foreach (var item in adapterStatusMap)
-                        Debug.Log($"Adapter {item.Key} is {item.Value.InitializationState}");
+                        Debug.Log($"어댑터 {item.Key}는 {item.Value.InitializationState}입니다");
 
                 Debug.Log("Google 모바일 광고 초기화가 완료되었습니다.");
                 _isInitialized = true;

@@ -163,7 +163,7 @@ namespace IAP
             await UniTask.WaitUntil(() => _isRestoring == false,
                 cancellationToken: this.GetCancellationTokenOnDestroy());
 
-            if (IAPManager.Instance.Debug) Debug.Log("Restore purchases completed");
+            if (IAPManager.Instance.Debug) Debug.Log("구매 복원이 완료되었습니다");
         }
 
         /// <summary>
@@ -196,10 +196,10 @@ namespace IAP
             switch (iapStatus)
             {
                 case IAPOperationStatus.Success:
-                    if (IAPManager.Instance.Debug) Debug.Log($"Buy product ({productName}) completed");
+                    if (IAPManager.Instance.Debug) Debug.Log($"제품 구매 ({productName})가 완료되었습니다");
                     return BuyResult.Success;
                 case IAPOperationStatus.Fail:
-                    if (IAPManager.Instance.Debug) Debug.Log($"Buy product failed: {resultMessage}");
+                    if (IAPManager.Instance.Debug) Debug.Log($"제품 구매에 실패했습니다: {resultMessage}");
                     return BuyResult.UnknownError;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -216,7 +216,7 @@ namespace IAP
         {
             if (_mProductsMap.TryGetValue(product, out var storeProducts) == false)
             {
-                Debug.LogError($"Product {product} not found");
+                Debug.LogError($"제품 {product}을 찾을 수 없습니다");
                 return null;
             }
 
@@ -265,12 +265,12 @@ namespace IAP
             if (status == IAPOperationStatus.Fail)
             {
                 //en error occurred in the buy process, log the message for more details
-                if (IAPManager.Instance.Debug) Debug.Log("Buy product failed: " + message);
+                if (IAPManager.Instance.Debug) Debug.Log("제품 구매에 실패했습니다: " + message);
                 return;
             }
 
             if (IAPManager.Instance.Debug)
-                Debug.Log("Buy product completed: " + product.localizedTitle + " receive value: " + product.value);
+                Debug.Log("제품 구매가 완료되었습니다: " + product.localizedTitle + " 받은 값: " + product.value);
 
             var eShopProduct = IAPManager.Instance.ConvertNameToShopProduct(product.productName);
 
@@ -312,7 +312,7 @@ namespace IAP
                 OnInitializeFailed();
             }
 
-            if (IAPManager.Instance.Debug) Debug.Log("Init status: " + status + " message " + message);
+            if (IAPManager.Instance.Debug) Debug.Log("초기화 상태: " + status + " 메시지 " + message);
         }
 
         /// <summary>

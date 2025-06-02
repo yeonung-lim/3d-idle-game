@@ -108,7 +108,7 @@ namespace GoogleMobileAds.Samples
         /// </remarks>
         public void ShowPrivacyOptionsForm(Action<string> onComplete)
         {
-            Debug.Log("Showing privacy options form.");
+            Debug.Log("개인정보 옵션 양식을 표시합니다.");
 
             // 콜백을 오류 팝업 핸들러와 결합합니다.
             onComplete = onComplete == null

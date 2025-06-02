@@ -1,4 +1,3 @@
-
 /*     ===== Do not touch this. Auto Generated Code. =====    */
 /*     If you want custom code generation modify this => 'CodeGeneratorUnityEngine.cs'  */
 using GoogleSheet.Protocol.v2.Res;
@@ -12,7 +11,7 @@ using System.IO;
 using GoogleSheet.Type;
 using System.Reflection;
 using UnityEngine;
-
+using UnityEngine.Networking;
 
 namespace DefaultTable
 {
@@ -23,8 +22,8 @@ namespace DefaultTable
         public delegate void OnLoadedFromGoogleSheets(List<Data> loadedList, Dictionary<int, Data> loadedDictionary);
 
         static bool isLoaded = false;
-        static string spreadSheetID = "1kut4-VlMMMeQv8oQmQvuAiYBIMzBUShOIH8AktN1_2I"; // it is file id
-        static string sheetID = "0"; // it is sheet id
+        static string spreadSheetID = "1kut4-VlMMMeQv8oQmQvuAiYBIMzBUShOIH8AktN1_2I"; // 파일 ID입니다
+        static string sheetID = "0"; // 시트 ID입니다
         static UnityFileReader reader = new UnityFileReader();
 
 /* Your Loaded Data Storage. */
@@ -33,8 +32,8 @@ namespace DefaultTable
         public static List<Data> DataList = new List<Data>();   
 
         /// <summary>
-        /// Get Data List 
-        /// Auto Load
+        /// 데이터 목록 가져오기
+        /// 자동 로드
         /// </summary>
         public static List<Data> GetList()
         {{
@@ -43,8 +42,8 @@ namespace DefaultTable
         }}
 
         /// <summary>
-        /// Get Data Dictionary, keyType is your sheet A1 field type.
-        /// - Auto Load
+        /// 데이터 딕셔너리 가져오기, keyType은 시트 A1 필드 타입입니다.
+        /// - 자동 로드
         /// </summary>
         public static Dictionary<int, Data>  GetDictionary()
         {{
@@ -69,7 +68,7 @@ namespace DefaultTable
             if(isLoaded && forceReload == false)
             {
 #if UGS_DEBUG
-                 Debug.Log("Data is already loaded! if you want reload then, forceReload parameter set true");
+                 Debug.Log("데이터가 이미 로드되었습니다! 다시 로드하려면 forceReload 매개변수를 true로 설정하세요");
 #endif
                  return;
             }
@@ -149,7 +148,7 @@ namespace DefaultTable
                                     string type = typeInfos[j].type;
                                     if (type.StartsWith(" < ") && type.Substring(1, 4) == "Enum" && type.EndsWith(">"))
                                     {
-                                         Debug.Log("It's Enum");
+                                         Debug.Log("열거형입니다");
                                     }
 
                                     var readedValue = TypeMap.Map[typeInfo].Read(rows[j][i]);
@@ -160,7 +159,7 @@ namespace DefaultTable
                                 {
                                     if (e is UGSValueParseException)
                                     {
-                                        Debug.LogError("<color=red> UGS Value Parse Failed! </color>");
+                                        Debug.LogError("<color=red> UGS 값 파싱 실패! </color>");
                                         Debug.LogError(e);
                                         return (null, null);
                                     }

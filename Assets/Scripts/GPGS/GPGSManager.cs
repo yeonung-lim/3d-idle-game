@@ -33,7 +33,7 @@ namespace GPGS
                 if (status != SignInStatus.Success)
                 {
                     _autoAuthFailed = true;
-                    Debug.Log("구글 플레이 게임 서비스 로그인 실패 : " + status);
+                    Debug.Log("구글 플레이 게임 서비스 로그인 실패: " + status);
 
                     tcs.TrySetResult(false);
                     return;

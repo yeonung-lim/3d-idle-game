@@ -9,7 +9,8 @@ namespace UnityCommunity.UnitySingleton
 {
 
     /// <summary>
-    /// The basic MonoBehaviour singleton implementation, this singleton is destroyed after scene changes, use <see cref="PersistentMonoSingleton{T}"/> if you want a persistent and global singleton instance.
+    /// 기본 MonoBehaviour 싱글톤 구현, 이 싱글톤은 씬 변경 후 파괴됩니다. 
+    /// 지속적이고 전역적인 싱글톤 인스턴스를 원한다면 <see cref="PersistentMonoSingleton{T}"/>를 사용하세요
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public abstract class MonoSingleton<T> : MonoBehaviour, ISingleton where T : MonoSingleton<T>
@@ -18,12 +19,12 @@ namespace UnityCommunity.UnitySingleton
         #region Fields
 
         /// <summary>
-        /// The instance.
+        /// 인스턴스
         /// </summary>
         private static T instance;
 
         /// <summary>
-        /// The initialization status of the singleton's instance.
+        /// 싱글톤 인스턴스의 초기화 상태
         /// </summary>
         private SingletonInitializationStatus initializationStatus = SingletonInitializationStatus.None;
 
@@ -32,9 +33,9 @@ namespace UnityCommunity.UnitySingleton
         #region Properties
 
         /// <summary>
-        /// Gets the instance.
+        /// 인스턴스를 가져옵니다.
         /// </summary>
-        /// <value>The instance.</value>
+        /// <value>인스턴스</value>
         public static T Instance
         {
             get
@@ -55,7 +56,7 @@ namespace UnityCommunity.UnitySingleton
         }
 
         /// <summary>
-        /// Gets whether the singleton's instance is initialized.
+        /// 싱글톤 인스턴스가 초기화되었는지 여부를 가져옵니다.
         /// </summary>
         public virtual bool IsInitialized => this.initializationStatus == SingletonInitializationStatus.Initialized;
 
@@ -95,7 +96,7 @@ namespace UnityCommunity.UnitySingleton
         #region Protected Methods
 
         /// <summary>
-        /// This gets called once the singleton's instance is created.
+        /// 싱글톤 인스턴스가 생성되면 호출됩니다.
         /// </summary>
         protected virtual void OnMonoSingletonCreated()
         {

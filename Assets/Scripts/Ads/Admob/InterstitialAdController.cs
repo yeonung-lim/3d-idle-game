@@ -33,7 +33,7 @@ namespace GoogleMobileAds.Samples
             // 새 광고를 로드하기 전에 이전 광고를 정리합니다.
             if (_interstitialAd != null) DestroyAd();
 
-            Debug.Log("Loading interstitial ad.");
+            Debug.Log("전면 광고를 로드 중입니다.");
 
             // 광고를 로드하는 데 사용되는 요청을 생성합니다.
             var adRequest = new AdRequest();
@@ -44,7 +44,7 @@ namespace GoogleMobileAds.Samples
                 // 작업이 이유와 함께 실패한 경우.
                 if (error != null)
                 {
-                    Debug.LogError("Interstitial ad failed to load an ad with error : " + error);
+                    Debug.LogError("전면 광고가 오류로 광고를 로드하지 못했습니다: " + error);
                     return;
                 }
 
@@ -109,7 +109,7 @@ namespace GoogleMobileAds.Samples
         private void RegisterEventHandlers(InterstitialAd ad)
         {
             // 광고가 수익을 올린 것으로 추정될 때 발생합니다.
-            ad.OnAdPaid += adValue => { Debug.Log($"전면 광고 수익 : {adValue.Value} {adValue.CurrencyCode}."); };
+            ad.OnAdPaid += adValue => { Debug.Log($"전면 광고 수익: {adValue.Value} {adValue.CurrencyCode}."); };
 
             // 광고에 대한 노출이 기록될 때 발생합니다.
             ad.OnAdImpressionRecorded += () => { Debug.Log("전면 광고 노출을 기록했습니다."); };

@@ -14,7 +14,7 @@ namespace Utils.Editor
         public static void ImportPackage(string packageToImport, UnityAction<string> UpdateMethod)
         {
             ImportRequiredPackages.UpdateMethod = UpdateMethod;
-            Debug.Log("Installation started. Please wait");
+            Debug.Log("설치가 시작되었습니다. 잠시 기다려주세요");
             Request = Client.Add(packageToImport);
             EditorApplication.update += Progress;
         }

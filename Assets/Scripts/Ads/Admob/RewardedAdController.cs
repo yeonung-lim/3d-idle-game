@@ -41,7 +41,7 @@ namespace GoogleMobileAds.Samples
                     return;
                 }
 
-                Debug.Log("반응이 있는 보상형 광고 : " + ad.GetResponseInfo());
+                Debug.Log("반응형 보상 광고가 응답과 함께 로드되었습니다: " + ad.GetResponseInfo());
                 _rewardedAd = ad;
 
                 RegisterEventHandlers(ad);
@@ -95,7 +95,7 @@ namespace GoogleMobileAds.Samples
         private void RegisterEventHandlers(RewardedAd ad)
         {
             // 광고가 수익을 올린 것으로 추정될 때 발생합니다.
-            ad.OnAdPaid += adValue => { Debug.Log($"보상형 광고 수익 발생 : {adValue.Value} {adValue.CurrencyCode}."); };
+            ad.OnAdPaid += adValue => { Debug.Log($"보상형 광고 수익 발생: {adValue.Value} {adValue.CurrencyCode}."); };
 
             // 광고에 대한 노출이 기록될 때 발생합니다.
             ad.OnAdImpressionRecorded += () => { Debug.Log("보상형 광고가 노출을 기록했습니다."); };

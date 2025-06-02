@@ -50,7 +50,7 @@ namespace Sound
             if (audioType == UIAudioType.None)
                 return null;
             if (!audioClipsDict.TryGetValue(audioType, out var audioInfo))
-                Debug.LogError($"{audioType} audio clip is missing!");
+                Debug.LogError($"{audioType} 오디오 클립이 누락되었습니다!");
 
             return audioInfo;
         }

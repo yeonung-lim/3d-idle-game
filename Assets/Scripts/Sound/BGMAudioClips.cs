@@ -41,7 +41,7 @@ namespace Sound
         public BGMAudioInfo GetAudioInfo(BGMAudioType audioType)
         {
             if (!audioClipsDict.TryGetValue(audioType, out var audioInfo))
-                Debug.LogError($"{audioType} audio clip is missing!");
+                Debug.LogError($"{audioType} 오디오 클립이 누락되었습니다!");
 
             return audioInfo;
         }

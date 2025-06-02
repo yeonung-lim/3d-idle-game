@@ -14,7 +14,7 @@ namespace UnityCommunity.UnitySingleton
     }
 
     /// <summary>
-    /// The singleton implementation for classes.
+    /// 클래스를 위한 싱글톤 구현
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public abstract class Singleton<T> : ISingleton where T : Singleton<T>, new()
@@ -23,12 +23,12 @@ namespace UnityCommunity.UnitySingleton
         #region Fields
 
         /// <summary>
-        /// The instance.
+        /// 인스턴스
         /// </summary>
         private static T instance;
 
         /// <summary>
-        /// The initialization status of the singleton's instance.
+        /// 싱글톤 인스턴스의 초기화 상태
         /// </summary>
         private SingletonInitializationStatus initializationStatus = SingletonInitializationStatus.None;
 
@@ -37,16 +37,16 @@ namespace UnityCommunity.UnitySingleton
         #region Properties
 
         /// <summary>
-        /// Gets the instance.
+        /// 인스턴스를 가져옵니다.
         /// </summary>
-        /// <value>The instance.</value>
+        /// <value>인스턴스</value>
         public static T Instance
         {
             get
             {
                 if (instance == null)
                 {
-                    //ensure that only one thread can execute
+                    //하나의 스레드만 실행할 수 있도록 보장
                     lock (typeof(T))
                     {
                         if (instance == null)
@@ -62,7 +62,7 @@ namespace UnityCommunity.UnitySingleton
         }
 
         /// <summary>
-        /// Gets whether the singleton's instance is initialized.
+        /// 싱글톤 인스턴스가 초기화되었는지 여부를 가져옵니다.
         /// </summary>
         public virtual bool IsInitialized => this.initializationStatus == SingletonInitializationStatus.Initialized;
 
