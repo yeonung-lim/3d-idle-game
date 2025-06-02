@@ -10,18 +10,18 @@ namespace Game.Core
         public event System.Action<int> OnStageChanged;
 
         public int monstersKilledThisStage { get; private set; }
-        public int monstersPerStage = 10; // Default, can be configured in Inspector
+        public int monstersPerStage = 10;
 
         void Awake()
         {
             if (Instance == null)
             {
                 Instance = this;
-                // DontDestroyOnLoad(gameObject); // Optional: if it should persist
+                // DontDestroyOnLoad(gameObject); // 선택사항: 씬 전환시 유지해야 하는 경우
             }
             else
             {
-                Debug.LogWarning("StageManager: Another instance already exists. Destroying this one.");
+                Debug.LogWarning("스테이지 매니저: 이미 인스턴스가 존재합니다. 현재 인스턴스를 제거합니다.");
                 Destroy(gameObject);
             }
         }
@@ -36,7 +36,7 @@ namespace Game.Core
             currentStage = 1;
             monstersKilledThisStage = 0;
             OnStageChanged?.Invoke(currentStage);
-            Debug.Log("StageManager initialized. Current Stage: " + currentStage);
+            Debug.Log("스테이지 매니저 초기화 완료. 현재 스테이지: " + currentStage);
         }
 
         public void AdvanceToNextStage()
@@ -44,22 +44,22 @@ namespace Game.Core
             currentStage++;
             monstersKilledThisStage = 0;
             OnStageChanged?.Invoke(currentStage);
-            Debug.Log("Advanced to Stage: " + currentStage);
-            // Future enhancements:
-            // - Notify MonsterSpawner to adjust difficulty (e.g., spawn stronger monsters, reduce spawnInterval)
-            // - Change environment, music, etc.
+            Debug.Log("다음 스테이지로 진행: " + currentStage);
+            // 향후 개선사항:
+            // - MonsterSpawner에 난이도 조정 알림 (예: 더 강한 몬스터 생성, 생성 간격 감소)
+            // - 환경, 음악 등 변경
         }
 
         public void MonsterKilled()
         {
-            if (currentStage == 0) // If not initialized or game over state
+            if (currentStage == 0) // 초기화되지 않았거나 게임오버 상태인 경우
             {
-                Debug.LogWarning("StageManager: MonsterKilled called but no active stage (currentStage is 0).");
+                Debug.LogWarning("스테이지 매니저: 활성화된 스테이지가 없는 상태에서 MonsterKilled가 호출됨 (currentStage가 0).");
                 return;
             }
 
             monstersKilledThisStage++;
-            Debug.Log("Monster killed for stage progress. Total this stage: " + monstersKilledThisStage + "/" + monstersPerStage);
+            Debug.Log("몬스터 처치 진행상황. 현재 스테이지 처치수: " + monstersKilledThisStage + "/" + monstersPerStage);
 
             if (monstersKilledThisStage >= monstersPerStage)
             {
@@ -69,10 +69,10 @@ namespace Game.Core
 
         void Update()
         {
-            // Debug key to advance stage
+            // 디버그용 다음 스테이지 진행 키
             if (Input.GetKeyDown(KeyCode.N))
             {
-                Debug.Log("Debug: Advancing to next stage via key press.");
+                Debug.Log("디버그: 키 입력으로 다음 스테이지 진행.");
                 AdvanceToNextStage();
             }
         }

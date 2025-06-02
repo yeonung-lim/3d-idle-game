@@ -1,32 +1,32 @@
 using UnityEngine;
-using TMPro; // Using TextMeshPro
-using Game.Core; // For StageManager
+using TMPro;
+using Game.Core;
 
 namespace Game.UI
 {
     public class StageDisplayUI : MonoBehaviour
     {
-        public TextMeshProUGUI stageText; // Assign in Inspector
+        public TextMeshProUGUI stageText;
 
         void Start()
         {
             if (stageText == null)
             {
-                Debug.LogError("StageDisplayUI: stageText (TextMeshProUGUI) is not assigned!", this);
-                enabled = false; // Disable script if text component is missing
+                Debug.LogError("StageDisplayUI: stageText (TextMeshProUGUI) 컴포넌트가 할당되지 않았습니다!", this);
+                enabled = false; // 텍스트 컴포넌트가 없으면 스크립트 비활성화
                 return;
             }
 
             if (StageManager.Instance != null)
             {
                 StageManager.Instance.OnStageChanged += UpdateStageText;
-                // Set initial text
+                // 초기 텍스트 설정
                 UpdateStageText(StageManager.Instance.currentStage);
             }
             else
             {
-                Debug.LogError("StageDisplayUI: StageManager.Instance is null. Cannot subscribe to OnStageChanged event or get initial stage.", this);
-                stageText.text = "Stage: Error"; // Display error on UI
+                Debug.LogError("StageDisplayUI: StageManager.Instance가 null입니다. OnStageChanged 이벤트 구독 및 초기 스테이지 설정이 불가능합니다.", this);
+                stageText.text = "스테이지: 오류"; // UI에 오류 표시
                 enabled = false;
             }
         }
@@ -35,7 +35,7 @@ namespace Game.UI
         {
             if (stageText != null)
             {
-                stageText.text = "Stage: " + newStage;
+                stageText.text = "스테이지: " + newStage;
             }
         }
 

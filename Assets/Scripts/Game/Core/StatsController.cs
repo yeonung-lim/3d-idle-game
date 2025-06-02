@@ -9,10 +9,10 @@ namespace Game.Core
         public Dictionary<StatType, Stat> stats = new Dictionary<StatType, Stat>();
 
         /// <summary>
-        /// Initializes the stats dictionary with a given list of stats.
-        /// Clears any existing stats.
+        /// 주어진 스탯 목록으로 스탯 딕셔너리를 초기화합니다.
+        /// 기존에 있던 모든 스탯을 제거합니다.
         /// </summary>
-        /// <param name="initialStats">A list of Stat objects to initialize with.</param>
+        /// <param name="initialStats">초기화할 Stat 객체 목록</param>
         public void InitializeStats(List<Stat> initialStats)
         {
             stats.Clear();
@@ -28,7 +28,7 @@ namespace Game.Core
                         }
                         else
                         {
-                            Debug.LogWarning($"StatsController: Stat type {stat.Type} already exists. Overwriting with new initial value.");
+                            Debug.LogWarning($"StatsController: {stat.Type} 타입의 스탯이 이미 존재합니다. 새로운 초기값으로 덮어씁니다.");
                             stats[stat.Type] = stat;
                         }
                     }
@@ -37,10 +37,10 @@ namespace Game.Core
         }
 
         /// <summary>
-        /// Gets the value of a specified stat.
+        /// 지정된 스탯의 값을 가져옵니다.
         /// </summary>
-        /// <param name="statType">The type of stat to retrieve.</param>
-        /// <returns>The value of the stat, or 0f if the stat doesn't exist.</returns>
+        /// <param name="statType">가져올 스탯의 타입</param>
+        /// <returns>스탯의 값, 스탯이 존재하지 않을 경우 0f를 반환합니다.</returns>
         public float GetStatValue(StatType statType)
         {
             if (stats.TryGetValue(statType, out Stat stat))
@@ -49,16 +49,16 @@ namespace Game.Core
             }
             else
             {
-                Debug.LogWarning($"StatsController: Stat type {statType} not found. Returning default value 0f.");
+                Debug.LogWarning($"StatsController: {statType} 타입의 스탯을 찾을 수 없습니다. 기본값 0f를 반환합니다.");
                 return 0f;
             }
         }
 
         /// <summary>
-        /// Sets the value of an existing stat. If the stat doesn't exist, it adds it.
+        /// 기존 스탯의 값을 설정합니다. 스탯이 존재하지 않을 경우 새로 추가합니다.
         /// </summary>
-        /// <param name="statType">The type of stat to set.</param>
-        /// <param name="value">The new value for the stat.</param>
+        /// <param name="statType">설정할 스탯의 타입</param>
+        /// <param name="value">스탯의 새로운 값</param>
         public void SetStatValue(StatType statType, float value)
         {
             if (stats.TryGetValue(statType, out Stat stat))
@@ -67,16 +67,16 @@ namespace Game.Core
             }
             else
             {
-                Debug.LogWarning($"StatsController: Stat type {statType} not found. Adding it with the specified value.");
+                Debug.LogWarning($"StatsController: {statType} 타입의 스탯을 찾을 수 없습니다. 지정된 값으로 새로 추가합니다.");
                 AddStat(statType, value);
             }
         }
 
         /// <summary>
-        /// Modifies the value of a stat by a given amount.
+        /// 스탯의 값을 주어진 양만큼 수정합니다.
         /// </summary>
-        /// <param name="statType">The type of stat to modify.</param>
-        /// <param name="amount">The amount to add (can be negative to subtract).</param>
+        /// <param name="statType">수정할 스탯의 타입</param>
+        /// <param name="amount">더할 양 (뺄셈의 경우 음수 사용)</param>
         public void ModifyStatValue(StatType statType, float amount)
         {
             if (stats.TryGetValue(statType, out Stat stat))
@@ -85,29 +85,29 @@ namespace Game.Core
             }
             else
             {
-                Debug.LogWarning($"StatsController: Stat type {statType} not found. Cannot modify. Consider adding it first.");
+                Debug.LogWarning($"StatsController: {statType} 타입의 스탯을 찾을 수 없습니다. 수정할 수 없습니다. 먼저 스탯을 추가하는 것을 고려하세요.");
             }
         }
 
         /// <summary>
-        /// Adds a new stat or updates an existing one.
+        /// 새로운 스탯을 추가하거나 기존 스탯을 업데이트합니다.
         /// </summary>
-        /// <param name="newStat">The Stat object to add or update.</param>
+        /// <param name="newStat">추가하거나 업데이트할 Stat 객체</param>
         public void AddStat(Stat newStat)
         {
             if (newStat == null)
             {
-                Debug.LogError("StatsController: Cannot add a null stat.");
+                Debug.LogError("StatsController: null 스탯은 추가할 수 없습니다.");
                 return;
             }
 
             if (stats.ContainsKey(newStat.Type))
             {
                 stats[newStat.Type] = newStat;
-                // Alternatively, could update stats[newStat.Type].Value = newStat.Value;
-                // Depending on whether a full replacement or just value update is desired.
-                // For now, replacing the whole Stat object.
-                Debug.Log($"StatsController: Stat type {newStat.Type} already exists. Updated with new stat object.");
+                // 선택적으로 stats[newStat.Type].Value = newStat.Value; 사용 가능
+                // 전체 교체가 필요한지 값만 업데이트할지에 따라 다름
+                // 현재는 전체 Stat 객체를 교체하는 방식 사용
+                Debug.Log($"StatsController: {newStat.Type} 타입의 스탯이 이미 존재합니다. 새로운 스탯 객체로 업데이트했습니다.");
             }
             else
             {
@@ -116,17 +116,17 @@ namespace Game.Core
         }
 
         /// <summary>
-        /// Convenience method to add a new stat with a specific type and value.
-        /// If the stat type already exists, its value will be updated.
+        /// 특정 타입과 값으로 새로운 스탯을 추가하는 편의 메서드입니다.
+        /// 스탯 타입이 이미 존재하는 경우 값이 업데이트됩니다.
         /// </summary>
-        /// <param name="statType">The type of stat to add.</param>
-        /// <param name="value">The initial value for the stat.</param>
+        /// <param name="statType">추가할 스탯의 타입</param>
+        /// <param name="value">스탯의 초기값</param>
         public void AddStat(StatType statType, float value)
         {
             if (stats.ContainsKey(statType))
             {
                 stats[statType].Value = value;
-                Debug.Log($"StatsController: Stat type {statType} already exists. Updated value to {value}.");
+                Debug.Log($"StatsController: {statType} 타입의 스탯이 이미 존재합니다. 값을 {value}로 업데이트했습니다.");
             }
             else
             {

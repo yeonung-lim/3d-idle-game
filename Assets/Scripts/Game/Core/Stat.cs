@@ -13,7 +13,6 @@ namespace Game.Core
         MoveSpeed,
         GoldBonus,
         ExpBonus
-        // Add more stat types as needed
     }
 
     [System.Serializable]
