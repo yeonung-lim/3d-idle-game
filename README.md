@@ -68,6 +68,32 @@ UI 시스템 관리 모듈
 -   다양한 광고 네트워크 연동 및 수익화
 -   사용자 경험을 고려한 광고 최적화
 
+### [AI](Assets/Scripts/AI/README.md)
+
+AI 시스템 모듈
+
+-   **행동 트리 (Behavior Tree)**
+
+    -   `BTNode`: 모든 행동 트리 노드의 기본 추상 클래스
+    -   `ActionNode`: 실제 행동을 수행하는 Leaf 노드
+    -   `ConditionNode`: 조건이 참일 경우에만 자식 노드를 실행하는 Decorator 노드
+    -   `SelectorNode`: 자식 노드 중 하나가 성공하거나 모두 실패할 때까지 순차적으로 실행
+    -   `SequenceNode`: 모든 자식 노드를 순차적으로 실행하며, 하나라도 실패하면 즉시 실패 반환
+    -   `NodeState`: 노드의 실행 결과 상태 (Success, Failure, Running)
+
+-   **몬스터 AI**
+
+    -   `AttackPlayerAction`: 플레이어를 공격하는 행동 구현
+    -   `MoveToPlayerAction`: 플레이어에게 이동하는 행동 구현
+    -   `PatrolAction`: 지정된 범위 내에서 랜덤하게 순찰하는 행동 구현
+
+-   **카메라 컨트롤러**
+    -   `Actor`: 카메라가 타겟팅할 수 있는 게임 엔티티의 기본 클래스
+    -   `BehaviorTreeRunner`: 행동 트리를 실행하는 컴포넌트
+        -   NavMeshAgent를 사용한 AI 이동 관리
+        -   플레이어/몬스터 AI 설정
+        -   자동/수동 모드 지원
+
 ## 추가 모듈
 
 ### GPGS (Google Play Games Services)
