@@ -137,19 +137,12 @@ bool success = MathUtils.RollProbability(75f); // 75% 확률
 float[] weights = {10f, 30f, 60f};
 int selected = MathUtils.WeightedRandomChoice(weights);
 
-// 값 보간
-float lerped = MathUtils.Lerp(0f, 100f, 0.5f); // 50f
-float smooth = MathUtils.SmoothLerp(0f, 100f, 0.5f); // 부드러운 보간
-
 // 범위 매핑
 float mapped = MathUtils.MapRange(5f, 0f, 10f, 0f, 100f); // 50f
 
 // 각도 처리
 float normalized = MathUtils.NormalizeAngle(-45f); // 315f
 float diff = MathUtils.AngleDifference(10f, 350f); // -20f
-
-// 가우시안 분포 랜덤
-float gaussian = MathUtils.GaussianRandom(0f, 1f);
 ```
 
 ## 네임스페이스
