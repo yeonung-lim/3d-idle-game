@@ -15,22 +15,20 @@ namespace AI.BehaviorTree
     {
         private BTNode rootNode;
 
-        [Header("Core Components")]
-        public NavMeshAgent Agent { get; private set; }
+        [Header("Core Components")] public NavMeshAgent Agent;
         // public HealthComponent SelfHealth { get; private set; } // 예시: 자신의 체력 컴포넌트
-
-        [Header("Player AI Specific")]
-        public Transform CurrentTarget { get; set; } // 플레이어의 현재 공격 타겟
+        [Header("Player AI Specific")] public Transform CurrentTarget; // 플레이어의 현재 공격 타겟
+        
         public bool IsManualMode { get; set; } = false; // 기본값: 자동 모드
-        public float PlayerAttackRange { get; set; } = 2.0f; // 플레이어 공격 범위
-        public float PlayerAttackCooldown { get; set; } = 1.5f; // 플레이어 공격 쿨타임
+        public float AttackRange { get; set; } = 2.0f; // 플레이어 공격 범위
+        public float AttackCooldown { get; set; } = 1.5f; // 플레이어 공격 쿨타임
         public float LastPlayerAttackTime { get; set; } = -Mathf.Infinity; // 마지막 공격 시간
 
         [Header("Monster AI Specific (Legacy/Example)")]
         // 아래는 몬스터 AI 예제에서 사용되었던 필드들입니다.
         // 플레이어 AI와 함께 사용하거나, 별도의 Runner 또는 설정 클래스로 분리할 수 있습니다.
-        public Transform PlayerTransform { get; set; } // 몬스터가 플레이어를 추적하기 위한 참조 (플레이어 AI에서는 사용되지 않을 수 있음)
-        public float MonsterAggroRange { get; set; } = 10f; // 몬스터 어그로 범위
+        public Transform PlayerTransform; // 몬스터가 플레이어를 추적하기 위한 참조 (플레이어 AI에서는 사용되지 않을 수 있음)
+        public float AggroRange { get; set; } = 10f; // 몬스터 어그로 범위
         // public float MonsterAttackRange { get; set; } = 2f; // 몬스터 공격 범위 (위의 PlayerAttackRange와 구분)
 
 

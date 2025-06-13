@@ -50,7 +50,8 @@ public class AddressablesBuildScript
 
 
         // Start the build process
-        AddressablesPlayerBuildResult buildResult = AddressableAssetSettings.BuildPlayerContent();
+        AddressablesPlayerBuildResult buildResult;
+        AddressableAssetSettings.BuildPlayerContent(out buildResult);
         // An alternative way to build if more control is needed:
         // AddressableAssetSettings.BuildPlayerContent(out AddressablesPlayerBuildResult result);
         // Or using a specific builder:

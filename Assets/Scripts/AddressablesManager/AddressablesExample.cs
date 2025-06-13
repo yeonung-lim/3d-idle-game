@@ -144,7 +144,7 @@ public class AddressablesExample : MonoBehaviour
                 if (loadedAsset != null)
                 {
                     // Instantiate the loaded asset
-                    _instantiatedAsset = Instantiate(loadedAsset, assetDisplayObject != null ? assetDisplayObject.transform : Vector3.zero, Quaternion.identity);
+                    _instantiatedAsset = Instantiate(loadedAsset, assetDisplayObject != null ? assetDisplayObject.transform.position : Vector3.zero, Quaternion.identity);
                     _instantiatedAsset.name = loadedAsset.name + "_Instance";
                     LogStatus($"Instantiated '{_instantiatedAsset.name}'.");
 

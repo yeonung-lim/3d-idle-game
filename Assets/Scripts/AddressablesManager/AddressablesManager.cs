@@ -1,10 +1,9 @@
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
-using UnityEngine.ResourceManagement.ResourceProviders; // Added for IResourceLocator
 using System.Collections.Generic;
-using System; // Added for Action
-using System.Collections; // Added for IEnumerator
+using System;
+using UnityEngine.AddressableAssets.ResourceLocators;
 
 public class AddressablesManager : MonoBehaviour
 {
