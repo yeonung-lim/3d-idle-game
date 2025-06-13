@@ -1,44 +1,44 @@
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro; // If using TextMeshPro for Text elements
-using System.Collections.Generic; // For List<string> in updates
-using System; // For Action
+using TMPro; // TextMeshPro를 사용하는 경우
+using System.Collections.Generic; // List<string>을 위한 업데이트
+using System; // Action을 위한 것
 
 public class AddressablesExample : MonoBehaviour
 {
     [Header("UI References")]
-    public TMP_InputField keyInput; // Use InputField if not using TextMeshPro
+    public TMP_InputField keyInput; // TextMeshPro를 사용하지 않는 경우 InputField 사용
     public Button checkUpdatesButton;
     public Button loadAssetButton;
     public Button unloadAssetButton;
     public Button loadGroupButton;
     public Button unloadGroupButton;
-    public TMP_Text statusText; // Use Text if not using TextMeshPro
-    public GameObject assetDisplayObject; // Optional: assign a placeholder in scene
+    public TMP_Text statusText; // TextMeshPro를 사용하지 않는 경우 Text 사용
+    public GameObject assetDisplayObject; // 선택사항: 씬에서 플레이스홀더 할당
 
     private GameObject _instantiatedAsset;
-    private List<string> _catalogsToUpdate; // Stores catalogs that need updating
+    private List<string> _catalogsToUpdate; // 업데이트가 필요한 카탈로그 저장
 
     void Start()
     {
-        // Ensure AddressablesManager instance is ready
+        // AddressablesManager 인스턴스가 준비되었는지 확인
         if (AddressablesManager.Instance == null)
         {
-            LogStatus("AddressablesManager not initialized!");
-            // Disable UI if manager is not available
+            LogStatus("AddressablesManager가 초기화되지 않았습니다!");
+            // 매니저를 사용할 수 없는 경우 UI 비활성화
             SetUIInteractable(false);
             return;
         }
 
-        // Assign button listeners
+        // 버튼 리스너 할당
         checkUpdatesButton.onClick.AddListener(HandleCheckUpdates);
         loadAssetButton.onClick.AddListener(HandleLoadAsset);
         unloadAssetButton.onClick.AddListener(HandleUnloadAsset);
         loadGroupButton.onClick.AddListener(HandleLoadGroup);
         unloadGroupButton.onClick.AddListener(HandleUnloadGroup);
 
-        LogStatus("Addressables Example Initialized. Enter an asset key or label and choose an action.");
-        SetUIInteractable(true); // Initially, update check might be the first logical step
+        LogStatus("Addressables 예제가 초기화되었습니다. 에셋 키나 라벨을 입력하고 작업을 선택하세요.");
+        SetUIInteractable(true); // 처음에는 업데이트 확인이 첫 번째 논리적 단계일 수 있음
     }
 
     void SetUIInteractable(bool isInteractable, bool keepUpdateEnabled = false)
@@ -49,7 +49,7 @@ public class AddressablesExample : MonoBehaviour
         unloadGroupButton.interactable = isInteractable;
         keyInput.interactable = isInteractable;
 
-        // Check updates button might have different interactable states
+        // 업데이트 확인 버튼은 다른 상호작용 상태를 가질 수 있음
         checkUpdatesButton.interactable = keepUpdateEnabled || isInteractable;
     }
 
@@ -64,21 +64,21 @@ public class AddressablesExample : MonoBehaviour
 
     void HandleCheckUpdates()
     {
-        LogStatus("Checking for catalog updates...");
-        SetUIInteractable(false, true); // Disable other buttons, keep update button enabled or manage its state separately
+        LogStatus("카탈로그 업데이트 확인 중...");
+        SetUIInteractable(false, true); // 다른 버튼 비활성화, 업데이트 버튼은 활성화 유지
 
         AddressablesManager.Instance.CheckForCatalogUpdates(
             catalogs => // onUpdateAvailable
             {
                 _catalogsToUpdate = catalogs;
-                LogStatus($"Updates available for: {string.Join(", ", catalogs)}. Click 'Update Catalogs' (not implemented in this example UI) or proceed to download them.");
-                // In a real scenario, you might enable an "Update Now" button here.
-                // For this example, let's try to update them immediately.
+                LogStatus($"업데이트 가능한 카탈로그: {string.Join(", ", catalogs)}. '카탈로그 업데이트'를 클릭하거나 다운로드를 진행하세요.");
+                // 실제 시나리오에서는 여기서 "지금 업데이트" 버튼을 활성화할 수 있습니다.
+                // 이 예제에서는 즉시 업데이트를 시도해보겠습니다.
                 HandleUpdateCatalogs();
             },
             () => // onNoUpdateNeeded
             {
-                LogStatus("No catalog updates needed.");
+                LogStatus("카탈로그 업데이트가 필요하지 않습니다.");
                 SetUIInteractable(true);
             }
         );
@@ -88,48 +88,47 @@ public class AddressablesExample : MonoBehaviour
     {
         if (_catalogsToUpdate == null || _catalogsToUpdate.Count == 0)
         {
-            LogStatus("No catalogs marked for update.");
+            LogStatus("업데이트할 카탈로그가 없습니다.");
             SetUIInteractable(true);
             return;
         }
 
-        LogStatus($"Starting download for catalogs: {string.Join(", ", _catalogsToUpdate)}");
-        SetUIInteractable(false); // Disable UI during update
+        LogStatus($"카탈로그 다운로드 시작: {string.Join(", ", _catalogsToUpdate)}");
+        SetUIInteractable(false); // 업데이트 중 UI 비활성화
 
         AddressablesManager.Instance.UpdateCatalogs(
             _catalogsToUpdate,
             progress => // onProgress
             {
-                LogStatus($"Update progress: {progress * 100:F2}%");
+                LogStatus($"업데이트 진행률: {progress * 100:F2}%");
             },
             () => // onComplete
             {
-                LogStatus("Catalog updates downloaded and applied successfully!");
-                _catalogsToUpdate = null; // Clear the list
+                LogStatus("카탈로그 업데이트가 성공적으로 다운로드되고 적용되었습니다!");
+                _catalogsToUpdate = null; // 목록 초기화
                 SetUIInteractable(true);
             },
             error => // onError
             {
-                LogStatus($"Catalog update failed: {error}");
+                LogStatus($"카탈로그 업데이트 실패: {error}");
                 SetUIInteractable(true);
             }
         );
     }
-
 
     void HandleLoadAsset()
     {
         string key = keyInput.text;
         if (string.IsNullOrEmpty(key))
         {
-            LogStatus("Please enter an asset key to load.");
+            LogStatus("로드할 에셋 키를 입력해주세요.");
             return;
         }
 
-        LogStatus($"Loading asset with key: {key}...");
+        LogStatus($"에셋 로드 중 (키: {key})...");
         SetUIInteractable(false);
 
-        // Destroy previously instantiated asset
+        // 이전에 인스턴스화된 에셋 제거
         if (_instantiatedAsset != null)
         {
             Destroy(_instantiatedAsset);
@@ -140,29 +139,28 @@ public class AddressablesExample : MonoBehaviour
             key,
             loadedAsset => // onComplete
             {
-                LogStatus($"Asset '{key}' loaded successfully.");
+                LogStatus($"에셋 '{key}' 로드 성공.");
                 if (loadedAsset != null)
                 {
-                    // Instantiate the loaded asset
-                    _instantiatedAsset = Instantiate(loadedAsset, assetDisplayObject != null ? assetDisplayObject.transform : Vector3.zero, Quaternion.identity);
+                    // 로드된 에셋 인스턴스화
+                    _instantiatedAsset = Instantiate(loadedAsset, assetDisplayObject != null ? assetDisplayObject.transform.position : Vector3.zero, Quaternion.identity);
                     _instantiatedAsset.name = loadedAsset.name + "_Instance";
-                    LogStatus($"Instantiated '{_instantiatedAsset.name}'.");
+                    LogStatus($"'{_instantiatedAsset.name}' 인스턴스화 완료.");
 
-                    // Example: If you loaded a Material instead of a GameObject
+                    // 예시: GameObject 대신 Material을 로드한 경우
                     // if (assetDisplayObject != null && loadedAsset is Material newMat) {
                     //     Renderer renderer = assetDisplayObject.GetComponent<Renderer>();
                     //     if (renderer != null) renderer.material = newMat;
-                    //     LogStatus($"Applied material '{newMat.name}' to {assetDisplayObject.name}.");
+                    //     LogStatus($"'{newMat.name}' 머티리얼을 {assetDisplayObject.name}에 적용했습니다.");
                     // } else if (loadedAsset is Material) {
-                    //     LogStatus("Loaded material but no display object to apply it to.");
+                    //     LogStatus("머티리얼을 로드했지만 적용할 디스플레이 오브젝트가 없습니다.");
                     // }
-
                 }
                 SetUIInteractable(true);
             },
             error => // onError
             {
-                LogStatus($"Failed to load asset '{key}'. Error: {error}");
+                LogStatus($"에셋 '{key}' 로드 실패. 오류: {error}");
                 SetUIInteractable(true);
             }
         );
@@ -173,25 +171,25 @@ public class AddressablesExample : MonoBehaviour
         string key = keyInput.text;
         if (string.IsNullOrEmpty(key))
         {
-            LogStatus("Please enter an asset key to unload.");
+            LogStatus("언로드할 에셋 키를 입력해주세요.");
             return;
         }
 
-        LogStatus($"Unloading asset: {key}...");
+        LogStatus($"에셋 언로드 중: {key}...");
 
-        // Destroy the specific instantiated object if it matches the key (more complex logic might be needed if keys don't match names)
-        // For simplicity, this example assumes one instantiated asset at a time.
+        // 키가 일치하는 특정 인스턴스화된 오브젝트 제거 (키가 이름과 일치하지 않을 경우 더 복잡한 로직이 필요할 수 있음)
+        // 단순화를 위해 이 예제는 한 번에 하나의 인스턴스화된 에셋만 가정합니다.
         if (_instantiatedAsset != null)
         {
-             // A more robust system would track instantiated objects by their key.
-             // For this example, we assume the current key corresponds to the current object.
+            // 더 견고한 시스템은 키별로 인스턴스화된 오브젝트를 추적할 것입니다.
+            // 이 예제에서는 현재 키가 현재 오브젝트에 해당한다고 가정합니다.
             Destroy(_instantiatedAsset);
             _instantiatedAsset = null;
-            LogStatus("Destroyed instantiated asset instance.");
+            LogStatus("인스턴스화된 에셋 인스턴스 제거됨.");
         }
 
         AddressablesManager.Instance.UnloadAsset(key);
-        LogStatus($"Unload call for asset '{key}' complete. Check logs from AddressablesManager for details.");
+        LogStatus($"에셋 '{key}' 언로드 호출 완료. 자세한 내용은 AddressablesManager 로그를 확인하세요.");
         SetUIInteractable(true);
     }
 
@@ -200,42 +198,42 @@ public class AddressablesExample : MonoBehaviour
         string label = keyInput.text;
         if (string.IsNullOrEmpty(label))
         {
-            LogStatus("Please enter an asset label to load as a group.");
+            LogStatus("그룹으로 로드할 에셋 라벨을 입력해주세요.");
             return;
         }
 
-        LogStatus($"Loading assets with label: {label}...");
+        LogStatus($"라벨이 있는 에셋 로드 중: {label}...");
         SetUIInteractable(false);
 
-        // Clear previously instantiated asset if any, as group loading might bring multiple.
+        // 그룹 로딩이 여러 개를 가져올 수 있으므로 이전에 인스턴스화된 에셋이 있다면 제거
         if (_instantiatedAsset != null)
         {
             Destroy(_instantiatedAsset);
             _instantiatedAsset = null;
         }
-        // Note: This example doesn't instantiate group-loaded assets to keep it simple.
-        // You would need a more complex system to manage multiple game objects from a group load.
+        // 참고: 이 예제는 단순하게 유지하기 위해 그룹 로드된 에셋을 인스턴스화하지 않습니다.
+        // 그룹 로드에서 여러 게임 오브젝트를 관리하려면 더 복잡한 시스템이 필요합니다.
 
         AddressablesManager.Instance.LoadAssetsByLabel<GameObject>(
             label,
-            asset => // onAssetLoaded (for each asset in the group)
+            asset => // onAssetLoaded (그룹의 각 에셋에 대해)
             {
                 if (asset != null)
                 {
-                    LogStatus($"Asset '{asset.name}' loaded as part of group '{label}'.");
-                    // Example: Instantiate or process each asset.
-                    // For simplicity, we're just logging here.
-                    // If instantiating, manage these objects in a list.
+                    LogStatus($"그룹 '{label}'의 일부로 에셋 '{asset.name}' 로드됨.");
+                    // 예시: 각 에셋 인스턴스화 또는 처리
+                    // 단순화를 위해 여기서는 로깅만 수행합니다.
+                    // 인스턴스화하는 경우 이 오브젝트들을 리스트로 관리하세요.
                 }
             },
             () => // onAllComplete
             {
-                LogStatus($"All assets for label '{label}' loaded.");
+                LogStatus($"라벨 '{label}'의 모든 에셋 로드 완료.");
                 SetUIInteractable(true);
             },
             error => // onError
             {
-                LogStatus($"Failed to load assets for label '{label}'. Error: {error}");
+                LogStatus($"라벨 '{label}'의 에셋 로드 실패. 오류: {error}");
                 SetUIInteractable(true);
             }
         );
@@ -246,29 +244,29 @@ public class AddressablesExample : MonoBehaviour
         string label = keyInput.text;
         if (string.IsNullOrEmpty(label))
         {
-            LogStatus("Please enter an asset label to unload.");
+            LogStatus("언로드할 에셋 라벨을 입력해주세요.");
             return;
         }
 
-        LogStatus($"Unloading assets with label: {label}...");
-        // Note: If you instantiated assets from HandleLoadGroup, you'd destroy them here.
-        // This example only logs, so no GameObjects to clean up from group loading here.
+        LogStatus($"라벨이 있는 에셋 언로드 중: {label}...");
+        // 참고: HandleLoadGroup에서 에셋을 인스턴스화했다면 여기서 제거해야 합니다.
+        // 이 예제는 로깅만 수행하므로 그룹 로딩에서 제거할 GameObjects가 없습니다.
 
         AddressablesManager.Instance.UnloadAssetsByLabel(label);
-        LogStatus($"Unload call for label '{label}' complete. Check logs from AddressablesManager.");
+        LogStatus($"라벨 '{label}' 언로드 호출 완료. 자세한 내용은 AddressablesManager 로그를 확인하세요.");
         SetUIInteractable(true);
     }
 
     void OnDestroy()
     {
-        // Clean up button listeners
+        // 버튼 리스너 정리
         if (checkUpdatesButton != null) checkUpdatesButton.onClick.RemoveAllListeners();
         if (loadAssetButton != null) loadAssetButton.onClick.RemoveAllListeners();
         if (unloadAssetButton != null) unloadAssetButton.onClick.RemoveAllListeners();
         if (loadGroupButton != null) loadGroupButton.onClick.RemoveAllListeners();
         if (unloadGroupButton != null) unloadGroupButton.onClick.RemoveAllListeners();
 
-        // Destroy any remaining instantiated asset
+        // 남아있는 인스턴스화된 에셋 제거
         if (_instantiatedAsset != null)
         {
             Destroy(_instantiatedAsset);

@@ -2,6 +2,7 @@
   "dependencies": {
     "com.annulusgames.scene-system": "https://github.com/AnnulusGames/SceneSystem.git?path=/Assets/SceneSystem",
     "com.shlifedev.ugs": "https://github.com/shlifedev/uni-google-sheets.git?path=src/",
+    "com.unity.addressables": "1.21.21",
     "com.unity.ai.navigation": "1.1.5",
     "com.unity.collab-proxy": "2.4.3",
     "com.unity.collections": "1.2.4",

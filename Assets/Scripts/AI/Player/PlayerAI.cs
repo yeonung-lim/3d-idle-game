@@ -74,15 +74,15 @@ namespace AI.Player
                     // Auto Mode Branch
                     new SequenceNode(btRunner, new List<BTNode> // AutoMode Sequence
                     {
-                        new ConditionNode(btRunner, playerHasTarget.Evaluate),       // PlayerHasTarget?
-                        new ConditionNode(btRunner, playerTargetIsAlive.Evaluate),   // PlayerTargetIsAlive?
+                        new ConditionNode(btRunner, playerHasTarget.Evaluate, new ActionNode(btRunner, () => NodeState.Success)),       // PlayerHasTarget?
+                        new ConditionNode(btRunner, playerTargetIsAlive.Evaluate, new ActionNode(btRunner, () => NodeState.Success)),   // PlayerTargetIsAlive?
                         new SelectorNode(btRunner, new List<BTNode> // Selector (Attack or Move)
                         {
                             // Attack Sequence
                             new SequenceNode(btRunner, new List<BTNode>
                             {
-                                new ConditionNode(btRunner, playerIsInAttackRange.Evaluate), // PlayerIsInAttackRange?
-                                new ConditionNode(btRunner, playerCanAttack.Evaluate),       // PlayerCanAttack?
+                                new ConditionNode(btRunner, playerIsInAttackRange.Evaluate, new ActionNode(btRunner, () => NodeState.Success)), // PlayerIsInAttackRange?
+                                new ConditionNode(btRunner, playerCanAttack.Evaluate, new ActionNode(btRunner, () => NodeState.Success)),       // PlayerCanAttack?
                                 new ActionNode(btRunner, attackAction.Execute)               // PlayerAttack
                             }),
                             // Move Action (if attack conditions not met or attack sequence fails)
