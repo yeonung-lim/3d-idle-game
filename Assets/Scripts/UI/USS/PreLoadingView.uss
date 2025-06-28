@@ -1,0 +1,36 @@
+.background {
+    flex-grow: 1;
+    background-color: rgb(42, 42, 42);
+    align-items: center;
+    justify-content: center;
+}
+
+.loading-container {
+    width: 60%;
+    max-width: 600px;
+    min-height: 200px;
+    padding: 20px;
+    background-color: rgb(60, 60, 60);
+    border-radius: 10px;
+    align-items: center;
+    justify-content: space-around;
+}
+
+.loading-text {
+    font-size: 28px;
+    color: rgb(255, 255, 255);
+    -unity-font-style: bold;
+    margin-bottom: 20px;
+}
+
+.loading-progress {
+    width: 90%;
+    height: 30px;
+    margin-bottom: 20px;
+}
+
+.loading-description {
+    font-size: 16px;
+    color: rgb(200, 200, 200);
+    -unity-text-align: middle-center;
+}

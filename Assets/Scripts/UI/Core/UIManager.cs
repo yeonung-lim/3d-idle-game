@@ -9,48 +9,6 @@ using UnityEngine.ResourceManagement.AsyncOperations; // AsyncOperationHandle에
 
 namespace Core.UI
 {
-    // AddressableManager를 위한 자리 표시자 - 이 네임스페이스에 있다고 가정하거나 필요에 따라 조정
-    // namespace Core.Managers
-    // {
-    //     public class AddressableManager
-    //     {
-    //         private static AddressableManager _instance;
-    //         public static AddressableManager Instance => _instance ?? (_instance = new AddressableManager()); // 간단한 싱글톤
-    //
-    //         public async Task<T> LoadAssetAsync<T>(string key) where T : class
-    //         {
-    //             Debug.Log($"[AddressableManager] 에셋 로드 시도: {key}");
-    //             AsyncOperationHandle<T> handle = Addressables.LoadAssetAsync<T>(key);
-    //             await handle.Task;
-    //             if (handle.Status == AsyncOperationStatus.Succeeded)
-    //             {
-    //                 Debug.Log($"[AddressableManager] 에셋 로드 성공: {key}");
-    //                 return handle.Result;
-    //             }
-    //             Debug.LogError($"[AddressableManager] 에셋 로드 실패: {key} - {handle.OperationException}");
-    //             return null;
-    //         }
-    //
-    //         public void ReleaseAsset(GameObject assetInstance) // 인스턴스나 키로 해제한다고 가정
-    //         {
-    //             if (assetInstance != null)
-    //             {
-    //                 Addressables.ReleaseInstance(assetInstance);
-    //                 Debug.Log($"[AddressableManager] 에셋 인스턴스 해제: {assetInstance.name}");
-    //             }
-    //         }
-    //          public void ReleaseAsset<T>(T asset) where T : class // 인스턴스나 키로 해제한다고 가정
-    //         {
-    //             if (asset != null)
-    //             {
-    //                 Addressables.Release(asset);
-    //                 Debug.Log($"[AddressableManager] 에셋 해제: {asset.GetType().Name}");
-    //             }
-    //         }
-    //     }
-    // }
-    // --- 자리 표시자 끝 ---
-
     public class UIManager : MonoBehaviour
     {
         #region Singleton
@@ -194,7 +152,13 @@ namespace Core.UI
         }
 
         #region View 관리
-        public async Task<TView> ShowView<TView>(ViewModelBase viewModel = null) where TView : View
+        /// <summary>
+        /// View를 표시합니다. 데이터 소스가 있는 경우 UI Toolkit의 데이터 바인딩을 사용합니다.
+        /// </summary>
+        /// <typeparam name="TView">표시할 View 타입</typeparam>
+        /// <param name="dataSource">UI에 바인딩할 데이터 객체 (선택사항)</param>
+        /// <returns>생성된 View 인스턴스</returns>
+        public async Task<TView> ShowView<TView>(object dataSource = null) where TView : View
         {
             if (!_isInitialized) Initialize();
 
@@ -208,7 +172,7 @@ namespace Core.UI
             if (_viewStack.Count > 0)
             {
                 View currentView = _viewStack.Peek();
-                // 최적화: 같은 View 타입이라면 ViewModel만 업데이트할 수 있음
+                // 최적화: 같은 View 타입이라면 데이터만 업데이트할 수 있음
                 // 지금은 항상 닫고 열기로 구현
                 CloseView(currentView);
             }
@@ -216,8 +180,12 @@ namespace Core.UI
             TView viewInstance = await GetOrCreateUI<TView>(key, _viewLayer);
             if (viewInstance != null)
             {
-                viewInstance.SetViewModel(viewModel); // ViewModel 바인딩
-                // viewModel?.OnActivated(); // ViewModel에 알림 -- UIBase.Show()에서 처리됨
+                // UI Toolkit의 네이티브 데이터 바인딩 사용
+                if (dataSource != null)
+                {
+                    viewInstance.SetDataSource(dataSource);
+                }
+                
                 viewInstance.Show();
                 _viewStack.Push(viewInstance);
                 Debug.Log($"UIManager: View {typeof(TView).Name} 표시됨.");
@@ -246,19 +214,16 @@ namespace Core.UI
                 // 이 경우는 최상위가 아닌 View를 닫으려고 시도하는 것
                 // 현재 설계(한 번에 하나의 View만)에서는 방지됨
                 // 필요한 경우 스택을 재구성
-                var tempStack = new Stack<View>(_viewStack.Reverse().Where(v => v != view));
-                _viewStack.Clear();
-                //foreach(var v in tempStack) _viewStack.Push(v); // 잘못됨, 다시 역순으로 해야 함
-                                                                // 더 간단하게: 필터링된 목록에서 다시 채우기
                 var list = _viewStack.ToList();
                 list.Remove(view);
                 _viewStack.Clear();
-                foreach(var v_item in ((IEnumerable<View>)list).Reverse()) _viewStack.Push(v_item);
+                foreach(var v_item in ((IEnumerable<View>)list).Reverse()) 
+                {
+                    _viewStack.Push(v_item);
+                }
 
                 Debug.LogWarning($"UIManager: 스택의 맨 위가 아닌 View({view.UIName})를 닫았습니다. 이는 비정상적인 상황입니다.");
             }
-
-            // (viewModelProperty.GetValue(view) as ViewModelBase)?.OnDeactivated(); -- UIBase.Close()에서 처리됨
 
             view.Close();
             // View는 파괴하지 않고 비활성화만 합니다. _loadedUIs에 캐시됩니다.
@@ -269,7 +234,13 @@ namespace Core.UI
         #endregion
 
         #region Popup 관리
-        public async Task<TPopup> ShowPopup<TPopup>(ViewModelBase viewModel = null) where TPopup : Popup
+        /// <summary>
+        /// Popup을 표시합니다. 데이터 소스가 있는 경우 UI Toolkit의 데이터 바인딩을 사용합니다.
+        /// </summary>
+        /// <typeparam name="TPopup">표시할 Popup 타입</typeparam>
+        /// <param name="dataSource">UI에 바인딩할 데이터 객체 (선택사항)</param>
+        /// <returns>생성된 Popup 인스턴스</returns>
+        public async Task<TPopup> ShowPopup<TPopup>(object dataSource = null) where TPopup : Popup
         {
             if (!_isInitialized) Initialize();
 
@@ -283,8 +254,13 @@ namespace Core.UI
             if (popupInstance != null)
             {
                 popupInstance.transform.SetAsLastSibling(); // 최상위에 표시
-                popupInstance.SetViewModel(viewModel); // ViewModel 바인딩
-                // viewModel?.OnActivated(); // ViewModel에 알림 -- UIBase.Show()에서 처리됨
+                
+                // UI Toolkit의 네이티브 데이터 바인딩 사용
+                if (dataSource != null)
+                {
+                    popupInstance.SetDataSource(dataSource);
+                }
+                
                 popupInstance.Show();
                 _popupStack.Push(popupInstance);
                 Debug.Log($"UIManager: Popup {typeof(TPopup).Name} 표시됨.");
@@ -297,9 +273,6 @@ namespace Core.UI
             if (_popupStack.Count > 0)
             {
                 Popup popup = _popupStack.Pop();
-
-                // (viewModelProperty.GetValue(popup) as ViewModelBase)?.OnDeactivated(); -- UIBase.Close()에서 처리됨
-
                 popup.Close();
                 // View와 달리 Popup은 일반적으로 닫을 때 파괴됩니다.
                 // AddressableManager.Instance.ReleaseAsset(popup.gameObject); // 인스턴스 해제
@@ -321,8 +294,6 @@ namespace Core.UI
             {
                 _popupStack.Push(p);
             }
-
-            // (viewModelProperty.GetValue(popupToClose) as ViewModelBase)?.OnDeactivated(); -- UIBase.Close()에서 처리됨
 
             popupToClose.Close();
             // AddressableManager.Instance.ReleaseAsset(popupToClose.gameObject);

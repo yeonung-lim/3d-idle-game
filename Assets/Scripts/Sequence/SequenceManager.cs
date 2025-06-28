@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using AsyncInitialize;
 using Back;
+using Core.UI;
 using Cysharp.Threading.Tasks;
+using UI.Views;
 using UnityEngine;
-using View.ViewComponents.Loading;
 using State = Core.StateMachine.State;
 
 namespace Sequence
@@ -15,7 +16,8 @@ namespace Sequence
     {
         [SerializeField] private GameObject[] preloadedAssets; // 미리 로드할 프리팹
 
-        [Header("Events")] [SerializeField] private AbstractGameEvent continueEvent; // 계속하기 이벤트
+        [Header("Events")] 
+        [SerializeField] private AbstractGameEvent continueEvent; // 계속하기 이벤트
         [SerializeField] private AbstractGameEvent backEvent; // 뒤로가기 이벤트
         [SerializeField] private AbstractGameEvent winEvent; // 승리 클리어 이벤트
         [SerializeField] private AbstractGameEvent loseEvent; // 승리 실패 이벤트
@@ -38,6 +40,11 @@ namespace Sequence
         private StateMachine _stateMachine;
 
         /// <summary>
+        ///     현재 표시 중인 로딩 뷰
+        /// </summary>
+        private PreLoadingView _preLoadingView;
+
+        /// <summary>
         ///     초기화 상태
         ///     - 미리 로드할 프리팹을 인스턴스화합니다.
         /// </summary>
@@ -52,7 +59,10 @@ namespace Sequence
         /// </summary>
         private void InstantiatePreloadedAssets()
         {
-            foreach (var asset in preloadedAssets) Instantiate(asset);
+            foreach (var asset in preloadedAssets) 
+            {
+                Instantiate(asset);
+            }
         }
 
         /// <summary>
@@ -78,19 +88,30 @@ namespace Sequence
         /// <returns></returns>
         private IState CreateLoadingState()
         {
-            return new State(() =>
+            return new State(async () =>
             {
-                var indicator = new LoadingIndicator();
+                // PreLoadingView 표시
+                var loadingData = new PreLoadingData
+                {
+                    LoadingText = "게임 초기화 중...",
+                    Progress = 0f,
+                    Description = "게임을 준비하는 중입니다."
+                };
 
-                // ShowUI<LoadingView, LoadingViewSetting>(
-                //     new LoadingViewSetting("loading_title", "loading_text", indicator));
+                _preLoadingView = await UIManager.Instance.ShowView<PreLoadingView>(loadingData);
 
                 _asyncLoadingResources = new List<IAsyncInit>
                 {
                     BackEndManager.Instance
                 };
 
-                LoadingResources(_asyncLoadingResources, indicator).ContinueWith(() => { continueEvent.Raise(); })
+                LoadingResources(_asyncLoadingResources, _preLoadingView)
+                    .ContinueWith(() => 
+                    {
+                        // 로딩 완료 후 UI 닫기
+                        UIManager.Instance.CloseCurrentView();
+                        continueEvent.Raise();
+                    })
                     .Forget();
             });
         }
@@ -99,8 +120,8 @@ namespace Sequence
         ///     IAsyncInit를 상속받은 클래스들을 로드합니다.
         /// </summary>
         /// <param name="asyncInits">로딩 할 리소스</param>
-        /// <param name="indicator">로딩 인디케이터</param>
-        private async UniTask LoadingResources(List<IAsyncInit> asyncInits, LoadingIndicator indicator)
+        /// <param name="preLoadingView">프리로딩 뷰</param>
+        private async UniTask LoadingResources(List<IAsyncInit> asyncInits, PreLoadingView preLoadingView)
         {
             var token = this.GetCancellationTokenOnDestroy();
 
@@ -109,16 +130,29 @@ namespace Sequence
             for (var i = 0; i < asyncInits.Count; ++i)
             {
                 var operation = asyncInits[i].GetAsyncOperation();
+                
+                // 현재 로딩 중인 리소스 이름 표시
+                preLoadingView?.UpdateLoadingText($"로딩 중... ({i + 1}/{asyncInits.Count})");
+                preLoadingView?.UpdateDescription($"{asyncInits[i].GetType().Name} 초기화 중...");
+                
                 asyncInits[i].StartInitialize();
 
                 await UniTask.WaitUntil(() =>
                 {
-                    indicator.LoadingPercentage = CalculateLoadingProgress(operation,
-                        i, asyncInits.Count);
+                    var progress = CalculateLoadingProgress(operation, i, asyncInits.Count);
+                    preLoadingView?.UpdateProgress(progress);
                     return operation.IsDone;
                 }, cancellationToken: token);
             }
 
+            // 로딩 완료
+            preLoadingView?.UpdateProgress(1.0f);
+            preLoadingView?.UpdateLoadingText("로딩 완료!");
+            preLoadingView?.UpdateDescription("게임을 시작합니다...");
+            
+            // 잠시 대기 후 완료
+            await UniTask.Delay(500, cancellationToken: token);
+            
             Debug.Log("로딩이 끝났습니다");
         }
 
@@ -149,6 +183,7 @@ namespace Sequence
 
         private void OnMainMenu()
         {
+            Debug.Log("메인 메뉴 진입");
         }
     }
 }
