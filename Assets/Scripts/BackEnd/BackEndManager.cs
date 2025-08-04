@@ -40,7 +40,7 @@ namespace Back
             if (IsInitialized)
                 return;
 
-            var bro = Backend.Initialize(true); // 뒤끝 초기화
+            var bro = Backend.Initialize(); // 뒤끝 초기화
 
             // 뒤끝 초기화에 대한 응답값
             if (bro.IsSuccess())

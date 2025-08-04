@@ -1,9 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<xs:schema xmlns:editor="UnityEditor.UIElements" xmlns:engine="UnityEngine.UIElements" xmlns:AddressablesGUI="UnityEditor.AddressableAssets.GUIElements" xmlns="UnityEditor.AddressableAssets.Diagnostics" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema xmlns:editor="UnityEditor.UIElements" xmlns:AddressablesGUI="UnityEditor.AddressableAssets.GUIElements" xmlns:modelSelector="Unity.AI.ModelSelector.Components" xmlns:engine="UnityEngine.UIElements" xmlns:modelTrainer="Unity.AI.ModelTrainer.Components" xmlns="UnityEditor.AddressableAssets.Diagnostics" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:import schemaLocation="UnityEngine.UIElements.xsd" namespace="UnityEngine.UIElements" />
   <xs:import schemaLocation="UnityEditor.ShaderGraph.Drawing.xsd" namespace="UnityEditor.ShaderGraph.Drawing" />
   <xs:import schemaLocation="Unity.Services.Core.Editor.Environments.UI.xsd" namespace="Unity.Services.Core.Editor.Environments.UI" />
   <xs:import schemaLocation="UnityEditor.Rendering.xsd" namespace="UnityEditor.Rendering" />
+  <xs:import schemaLocation="Unity.AI.Toolkit.Accounts.Components.xsd" namespace="Unity.AI.Toolkit.Accounts.Components" />
+  <xs:import schemaLocation="Unity.AI.Sound.Components.xsd" namespace="Unity.AI.Sound.Components" />
+  <xs:import schemaLocation="Unity.AI.ModelTrainer.Components.xsd" namespace="Unity.AI.ModelTrainer.Components" />
+  <xs:import schemaLocation="Unity.AI.ModelSelector.Components.xsd" namespace="Unity.AI.ModelSelector.Components" />
+  <xs:import schemaLocation="Unity.AI.Material.Components.xsd" namespace="Unity.AI.Material.Components" />
+  <xs:import schemaLocation="Unity.AI.Image.Panel.xsd" namespace="Unity.AI.Image.Panel" />
+  <xs:import schemaLocation="Unity.AI.Image.Components.xsd" namespace="Unity.AI.Image.Components" />
+  <xs:import schemaLocation="Unity.AI.Generators.UI.xsd" namespace="Unity.AI.Generators.UI" />
+  <xs:import schemaLocation="Unity.AI.Assistant.Editor.SessionBanner.xsd" namespace="Unity.AI.Assistant.Editor.SessionBanner" />
+  <xs:import schemaLocation="Unity.AI.Animate.Components.xsd" namespace="Unity.AI.Animate.Components" />
   <xs:import schemaLocation="UnityEditor.UIElements.Debugger.xsd" namespace="UnityEditor.UIElements.Debugger" />
   <xs:import schemaLocation="Unity.UI.Builder.xsd" namespace="Unity.UI.Builder" />
   <xs:import schemaLocation="UnityEditor.Search.xsd" namespace="UnityEditor.Search" />
