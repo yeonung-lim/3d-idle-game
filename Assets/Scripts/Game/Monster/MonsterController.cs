@@ -61,14 +61,14 @@ namespace Game.Monster
         void HandleDeath()
         {
             // 골드 지급
-            if (CurrencyManager.Instance != null)
-            {
-                CurrencyManager.Instance.AddGold(goldValue);
-            }
-            else
-            {
-                Debug.LogError("MonsterController: CurrencyManager 인스턴스를 찾을 수 없습니다! 골드를 지급할 수 없습니다.");
-            }
+            // if (CurrencyManager.Instance != null)
+            // {
+            //     CurrencyManager.Instance.AddGold(goldValue);
+            // }
+            // else
+            // {
+            //     Debug.LogError("MonsterController: CurrencyManager 인스턴스를 찾을 수 없습니다! 골드를 지급할 수 없습니다.");
+            // }
 
             // StageManager에 알림
             if (StageManager.Instance != null)

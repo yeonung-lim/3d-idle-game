@@ -13,5 +13,7 @@ namespace ProjectIdle
         public long diamond; // 사용자의 다이아몬드
         public int level; // 사용자의 레벨
         public int exp; // 사용자의 경험치
+        public int attack;
+        public int maxHp;
     }
 }

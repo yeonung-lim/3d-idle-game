@@ -12,3 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec71da236c034578b9cec38dc6ad4861, type: 3}
   m_Name: UserCache
   m_EditorClassIdentifier: Assembly-CSharp::ProjectIdle.UserCache
+  gold: 10000
+  diamond: 0
+  level: 0
+  exp: 0
+  attack: 0
+  maxHp: 0
