@@ -1,0 +1,85 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/Scripts/UI/USS/IngameUIView.uss?fileID=7433441132597879392&amp;guid=cd45b0b30e6ec124ab253ffb3328d731&amp;type=3" />
+    <ui:VisualElement name="Container" style="flex-grow: 1; align-items: stretch; align-content: flex-start; min-height: auto; max-height: none; align-self: auto; justify-content: flex-start; bottom: initial; top: auto; flex-direction: column; width: 100%; height: 100%; -unity-font-definition: url(&quot;project://database/Assets/Fonts/Maplestory%20Light%20SDF.asset?fileID=11400000&amp;guid=5a491d666ce62014584be0481913c876&amp;type=2#Maplestory Light SDF&quot;);">
+        <ui:Label text="Label" name="Label" style="font-size: 42px; -unity-text-align: upper-center; background-color: rgba(255, 255, 255, 0.35); color: rgb(0, 0, 0); -unity-background-image-tint-color: rgb(255, 255, 255);">
+            <Bindings>
+                <UnityEngine.Localization.LocalizedString property="text" table="GUID:70598744974c8d84fa41e29bd60d80ed" entry="Id(84516810752)">
+                    <variables>
+                        <UnityEngine.Localization.LocalVariable name="stage">
+                            <UnityEngine.Localization.SmartFormat.PersistentVariables.IntVariable />
+                        </UnityEngine.Localization.LocalVariable>
+                    </variables>
+                </UnityEngine.Localization.LocalizedString>
+            </Bindings>
+        </ui:Label>
+        <ui:VisualElement name="Bottom-Container" style="flex-grow: 1; position: absolute; bottom: 0; height: 30%; width: 100%; background-color: rgb(255, 255, 255); border-top-left-radius: 50px; border-top-right-radius: 50px; align-items: auto; align-content: flex-start;">
+            <ui:VisualElement name="Currency-Container" style="flex-grow: 0; width: 100%; height: 67px; top: auto; flex-direction: row; padding-top: 0; padding-right: 36px; padding-bottom: 0; padding-left: 36px; flex-shrink: 0;">
+                <ui:VisualElement name="Gold-Container" style="flex-grow: 0; flex-direction: row; align-items: center; flex-shrink: 0; font-size: 25px;">
+                    <ui:VisualElement name="Gold-Image" style="flex-grow: 0; background-image: url(&quot;project://database/Assets/GUIPackCartoon/Sources/Icons/Icons%20Colored/PSD/Coin.psd?fileID=2800000&amp;guid=08557bbe25c2e413ea57256cd4f78fdd&amp;type=3#Coin&quot;); width: 64px; height: 64px; flex-shrink: 0;" />
+                    <ui:Label text="Label" name="Gold-Label" style="border-left-width: 5px; border-right-width: 5px;">
+                        <Bindings>
+                            <ui:DataBinding property="text" data-source-path="gold" data-source="project://database/Assets/Scripts/Data/Container/ScriptableObject/UserCache.asset?fileID=11400000&amp;guid=4b42e8c6686ae2141867c2ba0bf0571f&amp;type=2#UserCache" binding-mode="ToTarget" />
+                        </Bindings>
+                    </ui:Label>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="Status-Container" style="flex-grow: 1; width: 100%;">
+                <ui:VisualElement name="Upgrade-Button-Container-Attack" class="upgrade-button-row" style="padding-bottom: 0;">
+                    <ui:Label text="Attack: 10" name="Upgrade-Attack-Label" style="font-size: 25px;">
+                        <Bindings>
+                            <UnityEngine.Localization.LocalizedString property="text" table="GUID:70598744974c8d84fa41e29bd60d80ed" entry="Id(461278556160)">
+                                <variables>
+                                    <UnityEngine.Localization.LocalVariable name="value">
+                                        <UnityEngine.Localization.SmartFormat.PersistentVariables.IntVariable />
+                                    </UnityEngine.Localization.LocalVariable>
+                                </variables>
+                            </UnityEngine.Localization.LocalizedString>
+                        </Bindings>
+                    </ui:Label>
+                    <ui:Button name="Button" class="upgrade-button">
+                        <ui:Label text="Level Up" style="height: 14px; align-content: auto; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; color: rgb(255, 255, 255);">
+                            <Bindings>
+                                <UnityEngine.Localization.LocalizedString property="text" table="GUID:70598744974c8d84fa41e29bd60d80ed" entry="Id(27228080975872)" />
+                            </Bindings>
+                        </ui:Label>
+                        <ui:VisualElement name="Cost-Container" style="flex-grow: 0; position: relative; bottom: auto; width: 100%; height: 23px; flex-shrink: 0; align-content: center; align-self: auto; margin-bottom: 0; margin-top: 3px; margin-right: 0; margin-left: 0;">
+                            <ui:VisualElement name="BackgroundColor" style="flex-grow: 0; background-color: rgb(84, 152, 231); border-top-left-radius: 7px; border-top-right-radius: 7px; border-bottom-right-radius: 7px; border-bottom-left-radius: 7px; border-top-width: 0; border-right-width: 0; border-bottom-width: 0; border-left-width: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 5px; flex-shrink: 0; width: 90%; height: 69%; align-self: center; color: rgb(80, 137, 204); margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; flex-direction: row; align-items: center;">
+                                <ui:VisualElement style="flex-grow: 0; background-image: url(&quot;project://database/Assets/GUIPackCartoon/Sources/Icons/Icons%20Colored/PSD/Coin.psd?fileID=2800000&amp;guid=08557bbe25c2e413ea57256cd4f78fdd&amp;type=3#Coin&quot;); flex-shrink: 0; width: 15px; height: 15px;" />
+                                <ui:Label text="0" style="color: rgb(255, 255, 255); padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 2px;" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:Button>
+                </ui:VisualElement>
+                <ui:VisualElement name="Upgrade-Button-Container-Health" style="flex-grow: 0; flex-shrink: 0; flex-direction: row; justify-content: space-between; align-items: center; padding-left: 14px; padding-right: 14px;">
+                    <ui:Label text="Attack: 10" name="Upgrade-Health-Label" style="font-size: 25px;">
+                        <Bindings>
+                            <UnityEngine.Localization.LocalizedString property="text" table="GUID:70598744974c8d84fa41e29bd60d80ed" entry="Id(540223746048)">
+                                <variables>
+                                    <UnityEngine.Localization.LocalVariable name="curHealth">
+                                        <UnityEngine.Localization.SmartFormat.PersistentVariables.IntVariable />
+                                    </UnityEngine.Localization.LocalVariable>
+                                    <UnityEngine.Localization.LocalVariable name="maxHealth">
+                                        <UnityEngine.Localization.SmartFormat.PersistentVariables.IntVariable />
+                                    </UnityEngine.Localization.LocalVariable>
+                                </variables>
+                            </UnityEngine.Localization.LocalizedString>
+                        </Bindings>
+                    </ui:Label>
+                    <ui:Button name="Button" class="upgrade-button">
+                        <ui:Label text="Level Up" style="height: 14px; align-content: auto; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; color: rgb(255, 255, 255);">
+                            <Bindings>
+                                <UnityEngine.Localization.LocalizedString property="text" table="GUID:70598744974c8d84fa41e29bd60d80ed" entry="Id(27228080975872)" />
+                            </Bindings>
+                        </ui:Label>
+                        <ui:VisualElement name="Cost-Container" style="flex-grow: 0; position: relative; bottom: auto; width: 100%; height: 23px; flex-shrink: 0; align-content: center; align-self: auto; margin-bottom: 0; margin-top: 3px; margin-right: 0; margin-left: 0;">
+                            <ui:VisualElement name="BackgroundColor" style="flex-grow: 0; background-color: rgb(84, 152, 231); border-top-left-radius: 7px; border-top-right-radius: 7px; border-bottom-right-radius: 7px; border-bottom-left-radius: 7px; border-top-width: 0; border-right-width: 0; border-bottom-width: 0; border-left-width: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 5px; flex-shrink: 0; width: 90%; height: 69%; align-self: center; color: rgb(80, 137, 204); margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; flex-direction: row; align-items: center;">
+                                <ui:VisualElement style="flex-grow: 0; background-image: url(&quot;project://database/Assets/GUIPackCartoon/Sources/Icons/Icons%20Colored/PSD/Coin.psd?fileID=2800000&amp;guid=08557bbe25c2e413ea57256cd4f78fdd&amp;type=3#Coin&quot;); flex-shrink: 0; width: 15px; height: 15px;" />
+                                <ui:Label text="0" style="color: rgb(255, 255, 255); padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 2px;" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:Button>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

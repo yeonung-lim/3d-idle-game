@@ -1,5 +1,11 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="PreLoadingView.uss" />
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ui="UnityEngine.UIElements"
+    xmlns:uie="UnityEditor.UIElements"
+    xsi:noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd"
+>
+    <Style src="project://database/Assets/Scripts/UI/USS/PreLoadingView.uss?fileID=7433441132597879392&amp;guid=efdd605a1cc34724afbcf1977c1c3a76&amp;type=3#PreLoadingView" />
     <ui:VisualElement name="background" class="background">
         <ui:VisualElement name="loading-container" class="loading-container">
             <ui:Label text="로딩중..." name="loading-text" class="loading-text" />

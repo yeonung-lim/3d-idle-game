@@ -1,5 +1,5 @@
 using UnityEngine;
-using Game.Core; // StatsController와 StatType을 위한 import
+using Game.Core;
 
 namespace Game.Combat
 {

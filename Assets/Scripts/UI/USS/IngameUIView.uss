@@ -1,0 +1,44 @@
+:root {
+}
+
+.upgrade-button-row {
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding-left: 14px;
+    padding-right: 14px;
+    padding-bottom: 14px;
+    padding-top: 0;
+    height: 80px;
+    width: 100%;
+    align-self: auto;
+    align-content: flex-start;
+}
+
+.upgrade-button {
+    width: 100px;
+    height: 75px;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    border-left-color: rgb(147, 147, 147);
+    border-right-color: rgb(147, 147, 147);
+    border-top-color: rgb(147, 147, 147);
+    border-bottom-color: rgb(147, 147, 147);
+    background-color: rgb(109, 176, 255);
+    border-top-left-radius: 25px;
+    border-top-right-radius: 25px;
+    border-bottom-right-radius: 25px;
+    border-bottom-left-radius: 25px;
+    align-content: auto;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    align-self: auto;
+}
