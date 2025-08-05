@@ -10,6 +10,12 @@ namespace ProjectIdle
         QuestItem, // 퀘스트 아이템
         Special, // 특별한 아이템 (예: 이벤트 아이템)
     }
+
+    public enum ECurrencyID
+    {
+        Gold,
+        Gems
+    }
         
     public enum EItemRarity
     {

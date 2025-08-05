@@ -1,105 +1,238 @@
-using BackEnd;
-using Cysharp.Threading.Tasks;
-using GPGS;
-using UnityEngine;
-using Utils.Async;
+using System.Threading.Tasks;
 
 namespace Back.Module.Login
 {
-    public class BackEndLogin
-    {
-        public static bool IsAuthenticated { get; private set; }
+     using System;
+     using UnityEngine;
+     using BackEnd;
+     using Newtonsoft.Json;
 
-        private static string GetMessageWithFederationResult(string statusCode)
-        {
-            return statusCode switch
-            {
-                "200" => "로그인 성공",
-                "201" => "신규 회원가입 성공",
-                "400" => "디바이스 정보가 없습니다.",
-                "403" => "차단 당한 계정/디바이스 입니다.",
-                "410" => "탈퇴가 진행중인 계정입니다.",
-                _ => "알 수 없는 오류"
-            };
-        }
-
-        public static async UniTask<bool> AuthorizeFederation()
-        {
-            if (GooglePlayGamesService.IsAuthenticated == false)
-                await GooglePlayGamesService.Authenticate();
-
-            if (GooglePlayGamesService.IsAuthenticated == false)
-                return false;
-
-            var tcs = Completion.CreateWithDefaultCancelToken<bool>();
-
-            var token = await GetAccessToken();
-            Backend.BMember.AuthorizeFederation(
-                token, FederationType.GPGS2, "GPGS2로 가입", bro =>
-                {
-                    IsAuthenticated = bro.IsSuccess();
-                    tcs.TrySetResult(IsAuthenticated);
-                    Debug.Log("인증 결과 : " + GetMessageWithFederationResult(bro.GetStatusCode()));
-                });
-
-            return await tcs.Task;
-        }
-
-        public static bool CustomSignUp(string id, string pw)
-        {
-            // 커스텀 회원가입 로직
-            Debug.Log("회원가입을 요청합니다.");
-
-            var bro = Backend.BMember.CustomSignUp(id, pw);
-
-            if (bro.IsSuccess())
-                Debug.Log("회원가입에 성공했습니다. : " + bro);
-            else
-                Debug.LogError("회원가입에 실패했습니다. : " + bro);
-
-            return bro.IsSuccess();
-        }
-
-        public static void CustomLogin(string id, string pw)
-        {
-            // Step 3. 로그인 구현하기 로직
-        }
-
-        public static void UpdateNickname(string nickname)
-        {
-            // Step 4. 닉네임 변경 구현하기 로직
-        }
-
-        private static async UniTask<string> GetAccessToken()
-        {
-#if UNITY_ANDROID
-            var code = await GooglePlayGamesService.RequestAccessCode();
-
-            if (string.IsNullOrEmpty(code))
-            {
-                Debug.LogError("구글 플레이 게임 서비스 인증 코드가 없습니다.");
-                return code;
-            }
-
-            var tcs = Completion.CreateWithDefaultCancelToken<string>();
-            Backend.BMember.GetGPGS2AccessToken(code, googleCallback =>
-            {
-                Debug.Log("GetGPGS2AccessToken 호출 결과 : " + googleCallback);
-
-                if (googleCallback.IsSuccess())
-                {
-                    var accessToken = googleCallback.GetReturnValuetoJSON()["access_token"].ToString();
-                    tcs.TrySetResult(accessToken);
-                    Debug.Log("구글 플레이 게임 서비스 액세스 토큰 : " + accessToken);
-                }
-                else
-                {
-                    tcs.TrySetResult(string.Empty);
-                }
-            });
-
-            return await tcs.Task;
-#endif
-        }
-    }
+     public static class BackEndLogin
+     {
+          public static bool IsAuthenticated { get; private set; }
+          
+//         /// <summary>
+//         /// Login with token
+//         /// Available once player have success login
+//         /// </summary>
+//         /// <returns></returns>
+//         public static bool IsLoginWithTokenSuccess()
+//         {
+//             LoadingUIController.Instance.Loading(); // Start Loading
+//
+//             Debug.Log("Requesting login with token");
+//             var bro = Backend.BMember.LoginWithTheBackendToken();
+//
+//             LoadingUIController.Instance.FinishLoading(); // End Loading
+//             return bro.IsSuccess();
+//         }
+//
+//         /// <summary>
+//         /// Custom Login
+//         /// Debug Mode Only (not for open player)
+//         /// </summary>
+//         /// <param name="id"></param>
+//         /// <param name="pw"></param>
+//         public static void CustomSignUp(string id, string pw)
+//         {
+//             LoadingUIController.Instance.Loading(); // Start Loading
+//
+//             var bro = Backend.BMember.CustomSignUp(id, pw);
+//
+//             if (!bro.IsSuccess()) // if failed, showing error message
+//                 NoticeUIController.Instance.ShowNotice(bro.Message, null);
+//
+//             LoadingUIController.Instance.FinishLoading(); // End Loading
+//         }
+//
+//         /// <summary>
+//         /// Backnd Guest login
+//         /// Count as custom login
+//         /// </summary>
+//         public static void GuestLogin()
+//         {
+//             LoadingUIController.Instance.Loading(); // Start Loading
+//
+//             Debug.Log("Requesting guest login.");
+//
+//             var bro = Backend.BMember.GuestLogin("Guest Login");
+//
+//             if (!bro.IsSuccess()) // if failed, showing error message
+//             {
+//                 Backend.BMember.DeleteGuestInfo();
+//                 Backend.Utils.GetGoogleHash();
+//                 NoticeUIController.Instance.ShowNotice(bro.Message +" hash key "+ Backend.Utils.GetGoogleHash(), null);
+//             }
+//
+//             LoadingUIController.Instance.FinishLoading(); // End Loading
+//         }
+//
+//         /// <summary>
+//         /// Federation login with google
+//         /// </summary>
+//         public static void GoogleLogin()
+//         {
+//             LoadingUIController.Instance.Loading(); // Start Loading
+//
+//             LoginWithGoogle((isSuccess, errorMessage, token) =>
+//             {
+//                 if (!isSuccess) // if failed, showing error message
+//                 {
+//                     NoticeUIController.Instance.ShowNotice(errorMessage, null);
+//                     LoadingUIController.Instance.FinishLoading(); // End Loading
+//                     return;
+//                 }
+//
+//                 LoginGoogleWithFederationToken(token);
+//
+//                 LoadingUIController.Instance.FinishLoading(); // End Loading
+//             });
+//         }
+//
+//         /// <summary>
+//         /// Federation login with google
+//         /// </summary>
+//         public static void LoginGoogleWithFederationToken(string federationToken)
+//         {
+//             var bro = Backend.BMember.AuthorizeFederation(federationToken, FederationType.Google);
+//
+//             if (!bro.IsSuccess()) // if failed, showing error message
+//                 NoticeUIController.Instance.ShowNotice(bro.Message, null);
+//         }
+//
+//         /// <summary>
+//         /// Change to federation login
+//         /// available at custom and guest login only
+//         /// </summary>
+//         /// <param name="resultCallback"> result callback </param>
+//         /// <param name="overwriteCallback"> callback when thereis conflict account data </param>
+//         public static void ChangeCustomToFederationLogin(Action<bool> resultCallback, Action<string> conflictDataCallback)
+//         {
+//             LoadingUIController.Instance.Loading(); // Start Loading
+//
+//             LoginWithGoogle((isSuccess, errorMessage, token) =>
+//             {
+//                 if (!isSuccess)
+//                 {
+//                     NoticeUIController.Instance.ShowNotice(errorMessage, null);
+//                     LoadingUIController.Instance.FinishLoading(); // End Loading
+//                     return;
+//                 }
+//
+//
+//                 int accountStatus = CheckUserInBackend(token, FederationType.Google);
+//                 if (accountStatus == 200) // There is data in federation account
+//                 {
+//                     if (!BackndUserInfo.Instance.IsGuestAccount || !LogoutAccount())
+//                         NoticeUIController.Instance.ShowNotice("Change to federation process failed", null);
+//
+//                     var bro = Backend.BMember.AuthorizeFederation(token, FederationType.Google);
+//
+//                     if (!bro.IsSuccess()) // if failed, showing error message
+//                         NoticeUIController.Instance.ShowNotice(bro.Message, null);
+//
+//                     conflictDataCallback?.Invoke(token);
+//
+//                     if (!LogoutAccount())
+//                     {
+//                         Debug.Log("Change to federation process signout failed");
+//                         return;
+//                     }
+//
+//                     GuestLogin();
+//                 }
+//                 else if (accountStatus == 204) // The federationToken has not been signed up
+//                 {
+//                     Debug.Log("Change from guest login to federation login");
+//
+//                     var bro = Backend.BMember.ChangeCustomToFederation(token, FederationType.Google);
+//
+//                     if (!bro.IsSuccess()) // if failed, showing error message
+//                     {
+//                         GoogleSignOut(null);
+//                         NoticeUIController.Instance.ShowNotice(bro.Message, null);
+//                     }
+//
+//                     resultCallback?.Invoke(bro.IsSuccess()); // send result to callback
+//                 }
+//
+//                 LoadingUIController.Instance.FinishLoading(); // End Loading
+//             });
+//         }
+//
+//         /// <summary>
+//         /// Checking federation account state
+//         /// </summary>
+//         /// <param name="token"> federation token </param>
+//         /// <param name="federationType"> Federation account type </param>
+//         /// <returns> 204 When the federationToken has not been signed up,
+//         /// 200 When the federationToken has been signed up </returns>
+//         private static int CheckUserInBackend(string token, FederationType federationType)
+//         {
+//             BackendReturnObject bro = Backend.BMember.CheckUserInBackend(token, federationType);
+//
+//             if (!bro.IsSuccess())
+//                 NoticeUIController.Instance.ShowNotice(bro.Message, null);
+//             else
+//             {
+//                 Debug.Log("Message: " + bro.Message);
+//                 Debug.Log("Account info: " + bro.ToString());
+//             }
+//
+//             return bro.StatusCode; // return status code
+//         }
+//
+//         /// <summary>
+//         /// Login to google and get federation token
+//         /// </summary>
+//         /// <param name="googleLoginCallback"> result callback </param>
+//         private static void LoginWithGoogle(Action<bool, string, string> googleLoginCallback)
+//         {
+//             Debug.Log("Requesting login with google play.");
+//
+//             // Login google to get federation token
+//             TheBackend.ToolKit.GoogleLogin.Android.GoogleLogin(true,
+//                 (isSuccess, errorMessage, token) =>
+//                     googleLoginCallback?.Invoke(isSuccess, errorMessage, token));
+//         }
+//
+//         /// <summary>
+//         /// Federation google sign out
+//         /// </summary>
+//         /// <param name="resultCallback"> result callback </param>
+//         public static void GoogleSignOut(Action<bool> resultCallback)
+//         {
+//             Debug.Log("Requesting google sign out.");
+//
+//             TheBackend.ToolKit.GoogleLogin.Android.GoogleSignOut(true,
+//                 (isSuccess, errorMessage) =>
+//                 {
+//                     if (!isSuccess)
+//                         NoticeUIController.Instance.ShowNotice(errorMessage, null);
+//
+//                     resultCallback?.Invoke(isSuccess);
+//                 });
+//         }
+//
+//         /// <summary>
+//         /// Logout backnd account
+//         /// </summary>
+//         /// <returns> result state </returns>
+//         public static bool LogoutAccount()
+//         {
+//             var bro = Backend.BMember.Logout();
+//             
+//             if (!bro.IsSuccess())
+//                 NoticeUIController.Instance.ShowNotice(bro.Message, null);
+//
+//             Debug.Log("Message : " + bro.Message);
+//             Debug.Log("Bro : " + bro.ToString());
+//
+//             return bro.IsSuccess();
+//         }
+          public static async Task<bool> AuthorizeFederation()
+          {
+              return true;
+          }
+     }
 }
