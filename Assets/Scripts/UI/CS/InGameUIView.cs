@@ -1,23 +1,22 @@
+using Core.UI;
 using UnityEngine;
 using UnityEngine.Localization;
 using UnityEngine.UIElements;
 
 namespace UI.Views
 {
-    public class InGameUIView : MonoBehaviour
+    public class InGameUIView : View
     {
-        private VisualElement _rootVisualElement;
         private Button _attackLevelUpButton;
         private Button _healthLevelUpButton;
-        
-        private void Awake()
+
+        protected override void InitializeVisualElements()
         {
-            // UI Toolkit의 루트 요소를 가져옵니다.
-            _rootVisualElement = GetComponent<UIDocument>().rootVisualElement;
+            base.InitializeVisualElements();
 
             // UI 요소들을 찾습니다.
-            _attackLevelUpButton = _rootVisualElement.Q<Button>("attack-level-up-button");
-            _healthLevelUpButton = _rootVisualElement.Q<Button>("health-level-up-button");
+            _attackLevelUpButton = QueryElement<Button>("attack-level-up-button");
+            _healthLevelUpButton = QueryElement<Button>("health-level-up-button");
 
             // 버튼 클릭 이벤트 핸들러를 등록합니다.
             if (_attackLevelUpButton != null)
@@ -27,7 +26,7 @@ namespace UI.Views
 
             if (_healthLevelUpButton != null)
             {
-                 _healthLevelUpButton.clicked += OnHealthLevelUpClicked;
+                _healthLevelUpButton.clicked += OnHealthLevelUpClicked;
             }
         }
 
