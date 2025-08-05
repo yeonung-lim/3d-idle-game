@@ -33,7 +33,7 @@ Unity로 개발된 3D 방치형(Idle) 게임입니다. 플레이어가 직접 �
 UI 시스템 관리 모듈
 
 -   화면 전환, 팝업 관리, UI 컴포넌트 제어
--   MVC 패턴을 적용한 UI 아키텍처
+-   UI Toolkit 사용 (Data binding 활용)
 
 ### [Sound](Assets/Scripts/Sound/README.md)
 
@@ -45,7 +45,7 @@ UI 시스템 관리 모듈
 
 백엔드 서비스 통신 모듈
 
--   서버 연동, 데이터 동기화, 클라우드 저장
+-   인증, 유저 데이터 저장 등
 
 ### [Utils](Assets/Scripts/Utils/README.md)
 
@@ -95,14 +95,6 @@ AI 시스템 모듈
         -   자동/수동 모드 지원
 
 ## 추가 모듈
-
-### GPGS (Google Play Games Services)
-
-Google Play 게임 서비스 연동
-
-### AppleSignIn
-
-Apple 로그인 서비스 연동
 
 ### AsyncInitialize
 
